@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.cardview.widget.CardView
+    android:id="@+id/mainCardLayout"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
@@ -11,16 +12,45 @@
     app:cardCornerRadius="8dp"
     app:cardBackgroundColor="@android:color/white">
 
-    <ImageView
-        android:id="@+id/item_image"
-        android:layout_width="match_parent"
+<!--    <com.denzcoskun.imageslider.ImageSlider-->
+<!--        android:id="@+id/image_slider"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="match_parent"-->
+<!--        app:iss_auto_cycle="true"-->
+<!--        app:iss_period="1000"-->
+<!--        app:iss_delay="0"-->
+<!--        app:iss_placeholder="@color/black">-->
+
+<!--    </com.denzcoskun.imageslider.ImageSlider>-->
+
+    <com.denzcoskun.imageslider.ImageSlider
+        android:id="@+id/image_slider"
+        android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:scaleType="centerCrop"/>
+        app:iss_auto_cycle="true"
+        app:iss_period="2000"
+        app:iss_selected_dot="@color/white"
+        app:iss_placeholder="@color/purple_700"
+        app:iss_delay="0"/>
+
+<!--    <ImageView-->
+<!--        android:id="@+id/item_image"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="match_parent"-->
+<!--        android:scaleType="centerCrop"/>-->
+
+<!--    <ImageView-->
+<!--        android:id="@+id/item_image2"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="match_parent"-->
+<!--        android:scaleType="centerCrop"/>-->
+
 
     <LinearLayout
+        android:id="@+id/linear_layout"
         android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_gravity="bottom"
         android:padding="16dp"
         android:background="@drawable/gradation_black">
@@ -29,9 +59,9 @@
             android:id="@+id/item_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textStyle="bold"
             android:textColor="@android:color/white"
-            android:textSize="26sp"/>
+            android:textSize="26sp"
+            android:textStyle="bold" />
 
         <TextView
             android:id="@+id/item_age"

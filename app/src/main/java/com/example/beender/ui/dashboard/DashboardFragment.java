@@ -122,17 +122,17 @@ public class DashboardFragment extends Fragment {
 
     private List<ItemModel> addList() {
         List<ItemModel> items = new ArrayList<>();
-        items.add(new ItemModel(R.drawable.sample1, "Markonah", "24", "Jember"));
-        items.add(new ItemModel(R.drawable.sample2, "Marpuah", "20", "Malang"));
-        items.add(new ItemModel(R.drawable.sample3, "Sukijah", "27", "Jonggol"));
-        items.add(new ItemModel(R.drawable.sample4, "Markobar", "19", "Bandung"));
-        items.add(new ItemModel(R.drawable.sample5, "Marmut", "25", "Hutan"));
+        items.add(new ItemModel(R.drawable.sample1, R.drawable.sample2, "Markonah", "24", "Jember"));
+        items.add(new ItemModel(R.drawable.sample2,R.drawable.sample1, "Marpuah", "20", "Malang"));
+        items.add(new ItemModel(R.drawable.sample3,R.drawable.sample1, "Sukijah", "27", "Jonggol"));
+        items.add(new ItemModel(R.drawable.sample4,R.drawable.sample1, "Markobar", "19", "Bandung"));
+        items.add(new ItemModel(R.drawable.sample5,R.drawable.sample1, "Marmut", "25", "Hutan"));
 
-        items.add(new ItemModel(R.drawable.sample1, "Markonah", "24", "Jember"));
-        items.add(new ItemModel(R.drawable.sample2, "Marpuah", "20", "Malang"));
-        items.add(new ItemModel(R.drawable.sample3, "Sukijah", "27", "Jonggol"));
-        items.add(new ItemModel(R.drawable.sample4, "Markobar", "19", "Bandung"));
-        items.add(new ItemModel(R.drawable.sample5, "Marmut", "25", "Hutan"));
+        items.add(new ItemModel(R.drawable.sample1,R.drawable.sample2, "Markonah", "24", "Jember"));
+        items.add(new ItemModel(R.drawable.sample2,R.drawable.sample1, "Marpuah", "20", "Malang"));
+        items.add(new ItemModel(R.drawable.sample3,R.drawable.sample1, "Sukijah", "27", "Jonggol"));
+        items.add(new ItemModel(R.drawable.sample4, R.drawable.sample1,"Markobar", "19", "Bandung"));
+        items.add(new ItemModel(R.drawable.sample5, R.drawable.sample1,"Marmut", "25", "Hutan"));
         return items;
     }
 
