@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "883197638385",
+    "project_id": "beender-754cf",
+    "storage_bucket": "beender-754cf.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:883197638385:android:aaabe73df39adda0bd1b50",
+        "android_client_info": {
+          "package_name": "com.example.beender"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "883197638385-k1aopb7eg10oavrdee5mddmvdb3at5ia.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA1GtJz0FaUYTavikwsjpfs9Xj8JVPa0j4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "883197638385-k1aopb7eg10oavrdee5mddmvdb3at5ia.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
