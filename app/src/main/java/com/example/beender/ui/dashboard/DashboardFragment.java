@@ -34,6 +34,7 @@ public class DashboardFragment extends Fragment {
     private static final String TAG = DashboardFragment.class.getSimpleName();
     private CardStackLayoutManager manager;
     private CardStackAdapter adapter;
+    private String currentCardAttractionID;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -54,16 +55,16 @@ public class DashboardFragment extends Fragment {
             public void onCardSwiped(Direction direction) {
                 Log.d(TAG, "onCardSwiped: p=" + manager.getTopPosition() + " d=" + direction);
                 if (direction == Direction.Right){
-                    Toast.makeText(getContext(), "Direction Right", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "Direction Right " +currentCardAttractionID , Toast.LENGTH_SHORT).show();
                 }
                 if (direction == Direction.Top){
-                    Toast.makeText(getContext(), "Direction Top", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "Direction Top "+currentCardAttractionID, Toast.LENGTH_SHORT).show();
                 }
                 if (direction == Direction.Left){
-                    Toast.makeText(getContext(), "Direction Left", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "Direction Left "+currentCardAttractionID, Toast.LENGTH_SHORT).show();
                 }
                 if (direction == Direction.Bottom){
-                    Toast.makeText(getContext(), "Direction Bottom", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "Direction Bottom "+currentCardAttractionID, Toast.LENGTH_SHORT).show();
                 }
 
                 // Paginating
@@ -86,6 +87,7 @@ public class DashboardFragment extends Fragment {
             @Override
             public void onCardAppeared(View view, int position) {
                 TextView tv = view.findViewById(R.id.item_name);
+                currentCardAttractionID = tv.getText().toString();
                 Log.d(TAG, "onCardAppeared: " + position + ", nama: " + tv.getText());
             }
 
@@ -122,17 +124,17 @@ public class DashboardFragment extends Fragment {
 
     private List<ItemModel> addList() {
         List<ItemModel> items = new ArrayList<>();
-        items.add(new ItemModel(R.drawable.sample1, R.drawable.sample2, "Markonah", "24", "Jember"));
-        items.add(new ItemModel(R.drawable.sample2,R.drawable.sample1, "Marpuah", "20", "Malang"));
-        items.add(new ItemModel(R.drawable.sample3,R.drawable.sample1, "Sukijah", "27", "Jonggol"));
-        items.add(new ItemModel(R.drawable.sample4,R.drawable.sample1, "Markobar", "19", "Bandung"));
-        items.add(new ItemModel(R.drawable.sample5,R.drawable.sample1, "Marmut", "25", "Hutan"));
+        items.add(new ItemModel(R.drawable.sample1, R.drawable.sample2, "Markonah", "24", "Jember",11));
+        items.add(new ItemModel(R.drawable.sample2,R.drawable.sample1, "Marpuah", "20", "Malang", 2));
+        items.add(new ItemModel(R.drawable.sample3,R.drawable.sample1, "Sukijah", "27", "Jonggol", 3));
+        items.add(new ItemModel(R.drawable.sample4,R.drawable.sample1, "Markobar", "19", "Bandung", 4));
+        items.add(new ItemModel(R.drawable.sample5,R.drawable.sample1, "Marmut", "25", "Hutan", 5));
 
-        items.add(new ItemModel(R.drawable.sample1,R.drawable.sample2, "Markonah", "24", "Jember"));
-        items.add(new ItemModel(R.drawable.sample2,R.drawable.sample1, "Marpuah", "20", "Malang"));
-        items.add(new ItemModel(R.drawable.sample3,R.drawable.sample1, "Sukijah", "27", "Jonggol"));
-        items.add(new ItemModel(R.drawable.sample4, R.drawable.sample1,"Markobar", "19", "Bandung"));
-        items.add(new ItemModel(R.drawable.sample5, R.drawable.sample1,"Marmut", "25", "Hutan"));
+        items.add(new ItemModel(R.drawable.sample1,R.drawable.sample2, "Markonah", "24", "Jember", 6));
+        items.add(new ItemModel(R.drawable.sample2,R.drawable.sample1, "Marpuah", "20", "Malang", 7));
+        items.add(new ItemModel(R.drawable.sample3,R.drawable.sample1, "Sukijah", "27", "Jonggol", 8));
+        items.add(new ItemModel(R.drawable.sample4, R.drawable.sample1,"Markobar", "19", "Bandung", 9));
+        items.add(new ItemModel(R.drawable.sample5, R.drawable.sample1,"Marmut", "25", "Hutan", 10));
         return items;
     }
 

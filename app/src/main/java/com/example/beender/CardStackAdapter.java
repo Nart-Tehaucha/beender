@@ -112,17 +112,17 @@ public class CardStackAdapter extends RecyclerView.Adapter<CardStackAdapter.View
                 @Override
                 public void onClick(View view) {
                     Log.i("Shahar", data.getNama());
-                    Activity activity = (Activity) view.getContext();
-                    activity.getFragmentManager().beginTransaction().replace(R.id.FrameLayout, fragment).commit();
-                }
-
-                    AttractionPage fragment1 = new AttractionPage();
-                    FragmentManager fm = fragment1.getFragmentManager();
-                    Bundle args = new Bundle();
-                    FragmentTransaction ft = fm.beginTransaction();
-                    ft.replace(R.id.mainCardLayout,fragment1);
-                    ft.addToBackStack(null);
-                    ft.commit();
+//                    Activity activity = (Activity) view.getContext();
+//                    activity.getFragmentManager().beginTransaction().replace(R.id.FrameLayout, fragment).commit();
+//                }
+//
+//                    AttractionPage fragment1 = new AttractionPage();
+//                    FragmentManager fm = fragment1.getFragmentManager();
+//                    Bundle args = new Bundle();
+//                    FragmentTransaction ft = fm.beginTransaction();
+//                    ft.replace(R.id.mainCardLayout,fragment1);
+//                    ft.addToBackStack(null);
+//                    ft.commit();
 //                    androidx.fragment.app.Fragment fragment = new AttractionPage();
 //                    FragmentTransaction ft = this.getActivity().getSupportFragmentManager();
 //                    ft.replace(R.id.mainFrame, fragment);
