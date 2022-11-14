@@ -38,8 +38,8 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.SettingsBTN:
-                Toast.makeText(this, "Settings BTN pressed", Toast.LENGTH_SHORT).show();
+            case R.id.MyProfileBTN:
+                Toast.makeText(this, "My Profile BTN pressed", Toast.LENGTH_SHORT).show();
                 break;
             case R.id.logoutBTN:
                 Toast.makeText(this, "Logout BTN pressed", Toast.LENGTH_SHORT).show();
