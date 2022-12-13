@@ -111,7 +111,9 @@ public class CardStackAdapter extends RecyclerView.Adapter<CardStackAdapter.View
             linear_layout.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
+                    //When user is clicking on card
                     Log.i("Shahar", data.getNama());
+                    Toast.makeText(imageSlider.getContext(), data.getNama() +" card just clicked", Toast.LENGTH_SHORT).show();
 //                    Activity activity = (Activity) view.getContext();
 //                    activity.getFragmentManager().beginTransaction().replace(R.id.FrameLayout, fragment).commit();
 //                }
