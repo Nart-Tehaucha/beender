@@ -1,5 +1,7 @@
 package com.example.beender;
 
+import java.util.Date;
+
 public class TravelMap {
 
     public static Integer idCounter = 0;
@@ -8,12 +10,16 @@ public class TravelMap {
     private Integer imageurl;
     private String name;
     private String description;
+    private Date date;
 
-    public TravelMap(Integer id, Integer imageurl, String name, String description) {
+
+
+    public TravelMap(Integer id, Integer imageurl, String name, String description, Date date) {
         this.id = id;
         this.imageurl = imageurl;
         this.name = name;
         this.description = description;
+        this.date = date;
     }
 
     public static Integer getIdCounter() {
@@ -54,6 +60,14 @@ public class TravelMap {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public void setDate(Date date) {
+        this.date = date;
+    }
+
+    public Date getDate() {
+        return date;
     }
 
     @Override

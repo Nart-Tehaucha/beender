@@ -10,6 +10,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.text.SimpleDateFormat;
 import java.util.List;
 
 public class TravelMapsAdapter extends RecyclerView.Adapter<TravelMapsAdapter.TravelMapViewHolder>{
@@ -37,9 +38,13 @@ public class TravelMapsAdapter extends RecyclerView.Adapter<TravelMapsAdapter.Tr
 
     @Override
     public void onBindViewHolder(@NonNull com.example.beender.TravelMapsAdapter.TravelMapViewHolder holder, int position) {
+        SimpleDateFormat formatter = new SimpleDateFormat("MM/dd/yyyy");
+
+
         holder.productImage.setImageResource(travelMapstList.get(position).getImageurl());
         holder.productDescription.setText(travelMapstList.get(position).getDescription().toString());
         holder.productName.setText(travelMapstList.get(position).getName());
+        holder.date.setText(formatter.format(travelMapstList.get(position).getDate()));
         //TO-DO: change from price to ID
         //holder.productPrice.setText(travelMapstList.get(position).getId());
 
@@ -68,7 +73,7 @@ public class TravelMapsAdapter extends RecyclerView.Adapter<TravelMapsAdapter.Tr
 
         ImageView productImage;
         TextView productName;
-        TextView productPrice;
+        TextView date;
         TextView productDescription;
 
         //Delete button
@@ -81,9 +86,8 @@ public class TravelMapsAdapter extends RecyclerView.Adapter<TravelMapsAdapter.Tr
             super(itemView);
             productImage = itemView.findViewById(R.id.productInCartImageView);
             productName = itemView.findViewById(R.id.product_in_cart_name);
-            productPrice = itemView.findViewById(R.id.productInCartPrice);
+            date = itemView.findViewById(R.id.date);
             productDescription = itemView.findViewById(R.id.descTextview);
-
             deleteIV = itemView.findViewById(R.id.deleteIV);
             editIV = itemView.findViewById(R.id.editIV);
         }

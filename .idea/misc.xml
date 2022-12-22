@@ -12,9 +12,13 @@
         <entry key="..\:/Users/shaha/AndroidStudioProjects/beender/app/src/main/res/drawable/ic_baseline_edit_24.xml" value="0.33" />
         <entry key="..\:/Users/shaha/AndroidStudioProjects/beender/app/src/main/res/drawable/ic_launcher_background.xml" value="0.1655" />
         <entry key="..\:/Users/shaha/AndroidStudioProjects/beender/app/src/main/res/drawable/ic_launcher_foreground.xml" value="0.1885" />
+        <entry key="..\:/Users/shaha/AndroidStudioProjects/beender/app/src/main/res/drawable/ic_notifications_black_24dp.xml" value="0.23" />
+        <entry key="..\:/Users/shaha/AndroidStudioProjects/beender/app/src/main/res/drawable/overlay_black.xml" value="0.23" />
         <entry key="..\:/Users/shaha/AndroidStudioProjects/beender/app/src/main/res/layout/activity_auth.xml" value="0.19519927536231885" />
         <entry key="..\:/Users/shaha/AndroidStudioProjects/beender/app/src/main/res/layout/activity_main.xml" value="0.15625" />
-        <entry key="..\:/Users/shaha/AndroidStudioProjects/beender/app/src/main/res/layout/archive_travelmap_item.xml" value="0.28940217391304346" />
+        <entry key="..\:/Users/shaha/AndroidStudioProjects/beender/app/src/main/res/layout/app_bar_delete_me.xml" value="0.2234375" />
+        <entry key="..\:/Users/shaha/AndroidStudioProjects/beender/app/src/main/res/layout/archive_travelmap_item.xml" value="0.1" />
+        <entry key="..\:/Users/shaha/AndroidStudioProjects/beender/app/src/main/res/layout/content_delete_me.xml" value="0.2234375" />
         <entry key="..\:/Users/shaha/AndroidStudioProjects/beender/app/src/main/res/layout/fragment_archive.xml" value="0.25" />
         <entry key="..\:/Users/shaha/AndroidStudioProjects/beender/app/src/main/res/layout/fragment_attraction_page.xml" value="0.1" />
         <entry key="..\:/Users/shaha/AndroidStudioProjects/beender/app/src/main/res/layout/fragment_blank.xml" value="0.1421875" />
@@ -26,10 +30,12 @@
         <entry key="..\:/Users/shaha/AndroidStudioProjects/beender/app/src/main/res/layout/fragment_register.xml" value="0.19519927536231885" />
         <entry key="..\:/Users/shaha/AndroidStudioProjects/beender/app/src/main/res/layout/fragment_settings.xml" value="0.1" />
         <entry key="..\:/Users/shaha/AndroidStudioProjects/beender/app/src/main/res/layout/item_card.xml" value="0.1" />
+        <entry key="..\:/Users/shaha/AndroidStudioProjects/beender/app/src/main/res/menu/activity_main_drawer.xml" value="0.2234375" />
         <entry key="..\:/Users/shaha/AndroidStudioProjects/beender/app/src/main/res/menu/bottom_nav_menu.xml" value="0.15625" />
         <entry key="..\:/Users/shaha/AndroidStudioProjects/beender/app/src/main/res/menu/top_nav_menu.xml" value="0.1" />
         <entry key="..\:/Users/shaha/AndroidStudioProjects/beender/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.1655" />
         <entry key="..\:/Users/shaha/AndroidStudioProjects/beender/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml" value="0.1" />
+        <entry key="..\:/Users/shaha/AndroidStudioProjects/beender/app/src/main/res/xml/root_preferences.xml" value="0.15806159420289856" />
       </map>
     </option>
   </component>

@@ -28,7 +28,10 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QuerySnapshot;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -152,14 +155,17 @@ public class ArchiveFragment extends Fragment implements TravelMapsAdapter.ItemC
 //            });
 
 
-                    // FOR NOW I'LL ADD HARD CODED
-                    TravelMap tm = new TravelMap(123, 2131230892, "NAME","description");
-                    TravelMap tm2 = new TravelMap(123, 2131230892, "NAME","description");
-                    TravelMap tm3= new TravelMap(123, 2131230892, "NAME","description");
-                    TravelMap tm4 = new TravelMap(123, 2131230892, "NAME","description");
-                    TravelMap tm5= new TravelMap(123, 2131230892, "NAME","description");
-                    TravelMap tm6 = new TravelMap(123, 2131230892, "NAME","description");
-                    TravelMap tm7 = new TravelMap(123, 2131230892, "NAME","description");
+
+
+
+            // FOR NOW I'LL ADD HARD CODED
+                    TravelMap tm = new TravelMap(123, R.drawable.map_icon, "MAP 1","description", new Date());
+                    TravelMap tm2 = new TravelMap(123, R.drawable.map_icon, "MAP 2","description", new Date());
+                    TravelMap tm3= new TravelMap(123, R.drawable.map_icon, "MAP 3","description",new Date() );
+                    TravelMap tm4 = new TravelMap(123, R.drawable.map_icon, "MAP 4","description",new Date());
+                    TravelMap tm5= new TravelMap(123, R.drawable.map_icon, "MAP 5","description", new Date());
+                    TravelMap tm6 = new TravelMap(123, R.drawable.map_icon, "MAP 6","description" , new Date());
+                    TravelMap tm7 = new TravelMap(123, R.drawable.map_icon, "MAP 7","description" , new Date());
 
                     allTravelMapsOfUser = new ArrayList<>();
                     allTravelMapsOfUser.add(tm);

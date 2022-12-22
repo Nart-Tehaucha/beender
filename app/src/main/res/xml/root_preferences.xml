@@ -1,35 +1,87 @@
-<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <PreferenceCategory app:title="@string/messages_header">
+    <PreferenceCategory app:title="TRAVEL SETTINGS">
 
         <EditTextPreference
-            app:key="signature"
-            app:title="@string/signature_title"
+            app:key="mainLocation"
+            app:title="Main Location"
             app:useSimpleSummaryProvider="true" />
 
         <ListPreference
-            app:defaultValue="reply"
-            app:entries="@array/reply_entries"
-            app:entryValues="@array/reply_values"
-            app:key="reply"
-            app:title="@string/reply_title"
+            app:defaultValue="3"
+            app:entries="@array/numOfPlaces_values"
+            app:entryValues="@array/numOfPlaces_values"
+            app:key="numOfPlacesPerDay"
+            app:title="Number of Places Per Day"
             app:useSimpleSummaryProvider="true" />
+
+        <SeekBarPreference
+            android:key="kmRadius"
+            app:title="KM Radius"
+            app:showSeekBarValue="true"
+            app:min="50"
+            android:max="100000"
+            android:defaultValue="150" />
+
+
+
+        <EditTextPreference
+            app:key="numOfDaysForTravel"
+            app:title="Number Of Days For Traveling"
+            android:inputType="number"
+            app:defaultValue="5"
+            app:useSimpleSummaryProvider="true" />
+
+        <MultiSelectListPreference
+            android:key="hoursOfTravel"
+            app:title="Hours Of Travel"
+            android:entries="@array/hoursOfTravel_values"
+            android:entryValues="@array/hoursOfTravel_values" />
+
+
 
     </PreferenceCategory>
 
-    <PreferenceCategory app:title="@string/sync_header">
+    <PreferenceCategory app:title="CARDS SETTINGS">
 
         <SwitchPreferenceCompat
-            app:key="sync"
-            app:title="@string/sync_title" />
+            android:key="adaptedForChildren"
+            app:title="Adapted For children"
+            android:defaultValue="false" />
 
         <SwitchPreferenceCompat
-            app:dependency="sync"
-            app:key="attachment"
-            app:summaryOff="@string/attachment_summary_off"
-            app:summaryOn="@string/attachment_summary_on"
-            app:title="@string/attachment_title" />
+            android:key="adaptedForElders"
+            app:title="Adapted For elders"
+            android:defaultValue="false" />
+
+        <SwitchPreferenceCompat
+            android:key="adapteForAWheelchair"
+            app:title="Adapted For a Wheelchair"
+            android:defaultValue="false" />
+
+        <ListPreference
+            app:defaultValue="Any"
+            app:entries="@array/rating_values"
+            app:entryValues="@array/rating_values"
+            app:key="ratingStar"
+            app:title="Rating"
+            app:useSimpleSummaryProvider="true" />
+
+        <MultiSelectListPreference
+            android:key="TypeOfPlaces"
+            app:title="Type of Places"
+            android:entries="@array/type_values"
+            android:entryValues="@array/type_values" />
+
+        <MultiSelectListPreference
+            android:key="priceLevel"
+            app:title="Price Level"
+            android:entries="@array/price_level_entries"
+            android:entryValues="@array/price_level_values"
+            android:defaultValue="@array/price_level_entries"/>
 
     </PreferenceCategory>
 
 </PreferenceScreen>
+
