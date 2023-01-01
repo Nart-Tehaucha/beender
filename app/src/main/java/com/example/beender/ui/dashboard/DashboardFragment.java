@@ -1,5 +1,6 @@
 package com.example.beender.ui.dashboard;
 
+import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -10,15 +11,25 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.DiffUtil;
 
+import com.example.beender.BuildConfig;
 import com.example.beender.CardStackAdapter;
 import com.example.beender.CardStackCallback;
 import com.example.beender.ItemModel;
 import com.example.beender.R;
 
+import com.example.beender.util.FetchData;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.libraries.places.api.Places;
+import com.google.android.libraries.places.api.net.PlacesClient;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.yuyakaido.android.cardstackview.CardStackLayoutManager;
 import com.yuyakaido.android.cardstackview.CardStackListener;
 import com.yuyakaido.android.cardstackview.CardStackView;
@@ -26,8 +37,22 @@ import com.yuyakaido.android.cardstackview.Direction;
 import com.yuyakaido.android.cardstackview.StackFrom;
 import com.yuyakaido.android.cardstackview.SwipeableMethod;
 
+
+import android.content.pm.PackageManager;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+
+import com.google.android.libraries.places.api.model.Place;
+import com.google.android.libraries.places.api.model.PlaceLikelihood;
+import com.google.android.libraries.places.api.net.FindCurrentPlaceRequest;
+import com.google.android.libraries.places.api.net.FindCurrentPlaceResponse;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executor;
 
 public class DashboardFragment extends Fragment {
 
@@ -35,12 +60,78 @@ public class DashboardFragment extends Fragment {
     private CardStackLayoutManager manager;
     private CardStackAdapter adapter;
     private String currentCardAttractionID;
+    private FloatingActionButton btnStartTrip;
+
+    // The entry point to the Places API.
+    private PlacesClient placesClient;
+
+    // The entry point to the Fused Location Provider.
+    private FusedLocationProviderClient fusedLocationProviderClient;
+
+    // A default location (Sydney, Australia) and default zoom to use when location permission is
+    // not granted.
+    private final LatLng defaultLocation = new LatLng(-33.8523341, 151.2106085);
+    private static final int DEFAULT_ZOOM = 15;
+    private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
+    private boolean locationPermissionGranted;
+
+    // The geographical location where the device is currently located. That is, the last-known
+    // location retrieved by the Fused Location Provider.
+    private Location lastKnownLocation;
+
+    // Keys for storing activity state.
+    private static final String KEY_LOCATION = "location";
+
+    // Used for selecting the current place.
+    private static final int M_MAX_ENTRIES = 5;
+    private String[] likelyPlaceNames;
+    private String[] likelyPlaceAddresses;
+    private List[] likelyPlaceAttributions;
+    private LatLng[] likelyPlaceLatLngs;
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        // Retrieve location from saved instance state.
+        if (savedInstanceState != null) {
+            lastKnownLocation = savedInstanceState.getParcelable(KEY_LOCATION);
+        }
+
+        // Construct a PlacesClient
+        Places.initialize(getContext(), BuildConfig.MAPS_API_KEY);
+        placesClient = Places.createClient(getContext());
+
+        // Construct a FusedLocationProviderClient.
+        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(getContext());
+
+    }
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_dashboard, container, false);
         init(root);
         return root;
+    }
+
+    // Adds listener to the Add Trip button
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        btnStartTrip = view.findViewById(R.id.btnStartTrip);
+        btnStartTrip.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // Initialize Places API request
+                // Prompt the user for permission.
+                getLocationPermission();
+                // [END_EXCLUDE]
+
+                // Get the current location of the device and set the position of the map.
+                getDeviceLocation();
+            }
+        });
     }
 
     private void init(View root) {
@@ -136,6 +227,107 @@ public class DashboardFragment extends Fragment {
         items.add(new ItemModel(R.drawable.sample4, R.drawable.sample1,"Markobar", "19", "Bandung", 9));
         items.add(new ItemModel(R.drawable.sample5, R.drawable.sample1,"Marmut", "25", "Hutan", 10));
         return items;
+    }
+
+    /**
+     * Gets the current location of the device, and positions the map's camera.
+     */
+    // [START maps_current_place_get_device_location]
+    private void getDeviceLocation() {
+        /*
+         * Get the best and most recent location of the device, which may be null in rare
+         * cases when a location is not available.
+         */
+        try {
+            if (locationPermissionGranted) {
+                Task<Location> locationResult = fusedLocationProviderClient.getLastLocation();
+                locationResult.addOnCompleteListener(getActivity(), new OnCompleteListener<Location>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Location> task) {
+                        if (task.isSuccessful()) {
+                            // Set the map's camera position to the current location of the device.
+                            lastKnownLocation = task.getResult();
+                            if (lastKnownLocation != null) {
+                                getNearbyPlaces(lastKnownLocation);
+                            }
+                        } else {
+                            Log.d(TAG, "Current location is null. Using defaults.");
+                            Log.e(TAG, "Exception: %s", task.getException());
+                        }
+                    }
+                });
+            }
+        } catch (SecurityException e)  {
+            Log.e("Exception: %s", e.getMessage(), e);
+        }
+    }
+    // [END maps_current_place_get_device_location]
+
+    /**
+     * Prompts the user for permission to use the device location.
+     */
+    // [START maps_current_place_location_permission]
+    private void getLocationPermission() {
+        /*
+         * Request location permission, so that we can get the location of the
+         * device. The result of the permission request is handled by a callback,
+         * onRequestPermissionsResult.
+         */
+        if (ContextCompat.checkSelfPermission(this.getContext(),
+                android.Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED) {
+            locationPermissionGranted = true;
+        } else {
+            ActivityCompat.requestPermissions(getActivity(),
+                    new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
+                    PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
+        }
+    }
+    // [END maps_current_place_location_permission]
+
+    /**
+     * Handles the result of the request for location permissions.
+     */
+    // [START maps_current_place_on_request_permissions_result]
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        locationPermissionGranted = false;
+        if (requestCode
+                == PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION) {// If request is cancelled, the result arrays are empty.
+            if (grantResults.length > 0
+                    && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                locationPermissionGranted = true;
+            }
+        } else {
+            super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        }
+    }
+    // [END maps_current_place_on_request_permissions_result]
+
+    /**
+     * Sends our current location through an HTTP request to Places API and receives a list of nearby places.
+     * @param startLocation
+     */
+    public void getNearbyPlaces(Location startLocation) {
+        StringBuilder stringBuilder = new StringBuilder("https://maps.googleapis.com/maps/api/place/nearbysearch/json?");
+        stringBuilder.append("location=" + startLocation.getLatitude() + "," + startLocation.getLongitude());
+        stringBuilder.append("&radius=1500");
+        stringBuilder.append("&type=point_of_interest");
+        stringBuilder.append("&key=" + BuildConfig.MAPS_API_KEY);
+
+        //String tstUrl = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=-33.8670522%2C151.1957362&radius=1500&type=restaurant&keyword=cruise&key=" + BuildConfig.MAPS_API_KEY;
+
+        String url = stringBuilder.toString();
+        Object dataFetch[] = new Object[2];
+        dataFetch[0] = null;
+        dataFetch[1] = url;
+
+        FetchData fetchData = new FetchData();
+        fetchData.execute(dataFetch);
+
+        Toast.makeText(getContext(), "HTTP SUCCESS ", Toast.LENGTH_SHORT).show();
     }
 
 }

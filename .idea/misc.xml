@@ -4,6 +4,12 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="..\:/Users/Nart/AndroidStudioProjects/Beender/app/src/main/res/drawable/ic_baseline_location_on_24.xml" value="0.4375" />
+        <entry key="..\:/Users/Nart/AndroidStudioProjects/Beender/app/src/main/res/layout/activity_main.xml" value="0.22685185185185186" />
+        <entry key="..\:/Users/Nart/AndroidStudioProjects/Beender/app/src/main/res/layout/archive_travelmap_item.xml" value="0.559375" />
+        <entry key="..\:/Users/Nart/AndroidStudioProjects/Beender/app/src/main/res/layout/fragment_archive.xml" value="0.559375" />
+        <entry key="..\:/Users/Nart/AndroidStudioProjects/Beender/app/src/main/res/layout/fragment_attraction_page.xml" value="0.22685185185185186" />
+        <entry key="..\:/Users/Nart/AndroidStudioProjects/Beender/app/src/main/res/layout/fragment_dashboard.xml" value="0.559375" />
+        <entry key="..\:/Users/Nart/AndroidStudioProjects/Beender/app/src/main/res/layout/fragment_home.xml" value="0.4466666666666667" />
         <entry key="..\:/Users/Nart/AndroidStudioProjects/Beender/app/src/main/res/layout/fragment_map.xml" value="0.22" />
         <entry key="..\:/Users/Nart/AndroidStudioProjects/Beender/app/src/main/res/menu/bottom_nav_menu.xml" value="0.559375" />
         <entry key="..\:/Users/shaha/AndroidStudioProjects/beender/app/src/main/res/drawable-v24/ic_launcher_foreground.xml" value="0.1885" />
