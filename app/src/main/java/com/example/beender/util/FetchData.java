@@ -3,6 +3,7 @@ package com.example.beender.util;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import com.example.beender.ui.dashboard.DashboardFragment;
 import com.google.android.gms.maps.GoogleMap;
 
 import java.io.IOException;
@@ -39,6 +40,7 @@ public class FetchData extends AsyncTask<Object,String,String> {
         Log.d(TAG, "listNearbyPlaces -" + listNearbyPlaces.toString());
         Log.d(TAG, "googleNearbyPlacesData -" + googleNearbyPlacesData);
         Log.d(TAG, "s -" + s);
+
 
         displayNearbyPlaces(listNearbyPlaces);
 

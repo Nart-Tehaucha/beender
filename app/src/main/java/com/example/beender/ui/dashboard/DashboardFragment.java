@@ -1,12 +1,15 @@
 package com.example.beender.ui.dashboard;
 
+import android.graphics.Bitmap;
 import android.location.Location;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.LinearInterpolator;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -23,7 +26,9 @@ import com.example.beender.CardStackCallback;
 import com.example.beender.ItemModel;
 import com.example.beender.R;
 
+import com.example.beender.util.DownloadUrl;
 import com.example.beender.util.FetchData;
+import com.example.beender.util.FetchImage;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.model.LatLng;
@@ -50,8 +55,15 @@ import com.google.android.libraries.places.api.model.PlaceLikelihood;
 import com.google.android.libraries.places.api.net.FindCurrentPlaceRequest;
 import com.google.android.libraries.places.api.net.FindCurrentPlaceResponse;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 
 public class DashboardFragment extends Fragment {
@@ -61,6 +73,7 @@ public class DashboardFragment extends Fragment {
     private CardStackAdapter adapter;
     private String currentCardAttractionID;
     private FloatingActionButton btnStartTrip;
+    private ImageView testIV;
 
     // The entry point to the Places API.
     private PlacesClient placesClient;
@@ -118,6 +131,8 @@ public class DashboardFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        testIV = view.findViewById(R.id.testIV);
 
         btnStartTrip = view.findViewById(R.id.btnStartTrip);
         btnStartTrip.setOnClickListener(new View.OnClickListener() {
@@ -248,7 +263,13 @@ public class DashboardFragment extends Fragment {
                             // Set the map's camera position to the current location of the device.
                             lastKnownLocation = task.getResult();
                             if (lastKnownLocation != null) {
-                                getNearbyPlaces(lastKnownLocation);
+                                try {
+                                    getNearbyPlaces(lastKnownLocation);
+                                } catch (ExecutionException e) {
+                                    e.printStackTrace();
+                                } catch (InterruptedException e) {
+                                    e.printStackTrace();
+                                }
                             }
                         } else {
                             Log.d(TAG, "Current location is null. Using defaults.");
@@ -310,7 +331,7 @@ public class DashboardFragment extends Fragment {
      * Sends our current location through an HTTP request to Places API and receives a list of nearby places.
      * @param startLocation
      */
-    public void getNearbyPlaces(Location startLocation) {
+    public void getNearbyPlaces(Location startLocation) throws ExecutionException, InterruptedException {
         StringBuilder stringBuilder = new StringBuilder("https://maps.googleapis.com/maps/api/place/nearbysearch/json?");
         stringBuilder.append("location=" + startLocation.getLatitude() + "," + startLocation.getLongitude());
         stringBuilder.append("&radius=1500");
@@ -327,7 +348,48 @@ public class DashboardFragment extends Fragment {
         FetchData fetchData = new FetchData();
         fetchData.execute(dataFetch);
 
+        String taskResult = "";
+        String photoReference = "";
+        taskResult = fetchData.get();
+
+        if(fetchData.getStatus() != AsyncTask.Status.PENDING) {
+            try {
+                Log.d(TAG, "INSIDE IF");
+                JSONObject jobj = new JSONObject(taskResult);
+                JSONArray jarr = jobj.getJSONArray("results");
+                Log.d(TAG, "OBJ - " + jobj.toString());
+                Log.d(TAG, "ARR - " + jarr.get(0).toString());
+                photoReference = ((JSONObject) ((JSONArray) ((JSONObject) jarr.get(0)).get("photos")).get(0)).get("photo_reference").toString();
+
+                getPlacePhoto(photoReference);
+                Log.d(TAG, "REF - " + photoReference);
+            } catch (JSONException | IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+
         Toast.makeText(getContext(), "HTTP SUCCESS ", Toast.LENGTH_SHORT).show();
     }
 
+    // Recieves a photo_reference of a place, sends an HTTP request to Places API, and converts the result to a Bitmap photo.
+    private void getPlacePhoto(String photoReference) throws IOException, ExecutionException, InterruptedException {
+        Bitmap placePhoto;
+
+        StringBuilder stringBuilder = new StringBuilder("https://maps.googleapis.com/maps/api/place/photo?");
+        stringBuilder.append("maxwidth=750");
+        stringBuilder.append("&maxheight=1125");
+        stringBuilder.append("&photo_reference=" + photoReference);
+        stringBuilder.append("&key=" + BuildConfig.MAPS_API_KEY);
+
+        String url = stringBuilder.toString();
+
+        FetchImage fetchImage = new FetchImage();
+        fetchImage.execute(url);
+
+        testIV.setImageBitmap(fetchImage.get());
+    }
+
+
 }
+

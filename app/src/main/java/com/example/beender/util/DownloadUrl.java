@@ -1,5 +1,8 @@
 package com.example.beender.util;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.media.Image;
 import android.util.Log;
 
 import java.io.BufferedReader;
@@ -45,5 +48,21 @@ public class DownloadUrl {
             httpURLConnection.disconnect();
         }
         return urlData;
+    }
+
+    public Bitmap retrievePhoto(String src) throws IOException {
+        try {
+            URL url = new URL(src);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setDoInput(true);
+            connection.connect();
+            InputStream input = connection.getInputStream();
+            Bitmap mBitmap = BitmapFactory.decodeStream(input);
+            return mBitmap;
+        } catch (IOException e) {
+            // Log exception
+            return null;
+        }
+
     }
 }

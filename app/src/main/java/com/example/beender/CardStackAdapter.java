@@ -83,8 +83,8 @@ public class CardStackAdapter extends RecyclerView.Adapter<CardStackAdapter.View
 
             usia = itemView.findViewById(R.id.item_age);
             kota = itemView.findViewById(R.id.item_city);
-            imageList.add(new SlideModel("https://i.natgeofe.com/n/4f5aaece-3300-41a4-b2a8-ed2708a0a27c/domestic-dog_thumb_4x3.jpg" , ScaleTypes.CENTER_CROP)); // for one image
-            imageList.add(new SlideModel("https://hips.hearstapps.com/hmg-prod.s3.amazonaws.com/images/dog-puppy-on-garden-royalty-free-image-1586966191.jpg?crop=1.00xw:0.669xh;0,0.190xh&resize=640:*" , ScaleTypes.CENTER_CROP)); // for one image
+            imageList.add(new SlideModel(R.drawable.sample1 , ScaleTypes.CENTER_CROP)); // for one image
+            imageList.add(new SlideModel(R.drawable.sample2 , ScaleTypes.CENTER_CROP)); // for one image
             imageSlider.setImageList(imageList, ScaleTypes.FIT); // for all images
         }
 
