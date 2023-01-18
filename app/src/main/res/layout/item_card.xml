@@ -12,38 +12,11 @@
     app:cardCornerRadius="8dp"
     app:cardBackgroundColor="@android:color/white">
 
-<!--    <com.denzcoskun.imageslider.ImageSlider-->
-<!--        android:id="@+id/image_slider"-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="match_parent"-->
-<!--        app:iss_auto_cycle="true"-->
-<!--        app:iss_period="1000"-->
-<!--        app:iss_delay="0"-->
-<!--        app:iss_placeholder="@color/black">-->
-
-<!--    </com.denzcoskun.imageslider.ImageSlider>-->
-
-    <com.denzcoskun.imageslider.ImageSlider
-        android:id="@+id/image_slider"
-        android:layout_width="wrap_content"
+    <ImageView
+        android:id="@+id/item_image"
+        android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:iss_auto_cycle="true"
-        app:iss_period="2000"
-        app:iss_selected_dot="@color/white"
-        app:iss_placeholder="@color/purple_700"
-        app:iss_delay="0"/>
-
-<!--    <ImageView-->
-<!--        android:id="@+id/item_image"-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="match_parent"-->
-<!--        android:scaleType="centerCrop"/>-->
-
-<!--    <ImageView-->
-<!--        android:id="@+id/item_image2"-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="match_parent"-->
-<!--        android:scaleType="centerCrop"/>-->
+        android:scaleType="centerCrop"/>
 
 
     <LinearLayout
@@ -64,7 +37,7 @@
             android:textStyle="bold" />
 
         <TextView
-            android:id="@+id/item_age"
+            android:id="@+id/item_city"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textStyle="bold"
@@ -72,7 +45,7 @@
             android:textSize="18sp"/>
 
         <TextView
-            android:id="@+id/item_city"
+            android:id="@+id/item_country"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textStyle="bold"
@@ -90,7 +63,7 @@
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/ic_arrow_forward_black_24dp"
+            android:src="@drawable/ic_baseline_thumb_up_24"
             android:layout_gravity="center"/>
 
     </FrameLayout>
@@ -104,7 +77,7 @@
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/ic_arrow_back_black_24dp"
+            android:src="@drawable/ic_baseline_thumb_down_24"
             android:layout_gravity="center"/>
 
     </FrameLayout>

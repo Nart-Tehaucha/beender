@@ -32,17 +32,17 @@ public class FetchData extends AsyncTask<Object,String,String> {
 
     @Override
     protected void onPostExecute(String s) {
-        List<HashMap<String, String>> listNearbyPlaces = null;
-        DataParser dataParser = new DataParser();
-        listNearbyPlaces = dataParser.parse(s);
-
-        Log.d(TAG, "FETCH EXECUTED");
-        Log.d(TAG, "listNearbyPlaces -" + listNearbyPlaces.toString());
-        Log.d(TAG, "googleNearbyPlacesData -" + googleNearbyPlacesData);
-        Log.d(TAG, "s -" + s);
-
-
-        displayNearbyPlaces(listNearbyPlaces);
+//        List<HashMap<String, String>> listNearbyPlaces = null;
+//        DataParser dataParser = new DataParser();
+//        listNearbyPlaces = dataParser.parse(s);
+//
+//        Log.d(TAG, "FETCH EXECUTED");
+//        Log.d(TAG, "listNearbyPlaces -" + listNearbyPlaces.toString());
+//        Log.d(TAG, "googleNearbyPlacesData -" + googleNearbyPlacesData);
+//        Log.d(TAG, "s -" + s);
+//
+//
+//        displayNearbyPlaces(listNearbyPlaces);
 
 
 //        try {
