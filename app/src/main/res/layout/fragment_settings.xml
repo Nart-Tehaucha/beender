@@ -5,6 +5,13 @@
     android:layout_height="match_parent"
     tools:context=".SettingsFragment">
 
+    <fragment
+        android:id="@+id/autocomplete_fragment"
+        android:name="com.google.android.libraries.places.widget.AutocompleteSupportFragment"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+
     <!-- TODO: Update blank fragment layout -->
     <TextView
         android:layout_width="match_parent"

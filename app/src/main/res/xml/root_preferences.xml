@@ -1,11 +1,18 @@
 <PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android">
-
     <PreferenceCategory app:title="TRAVEL SETTINGS">
 
-        <EditTextPreference
-            app:key="mainLocation"
-            app:title="Main Location"
+<!--        <EditTextPreference-->
+<!--            app:key="mainLocation"-->
+<!--            app:title="Main Location"-->
+<!--            app:useSimpleSummaryProvider="true" />-->
+
+        <ListPreference
+            app:defaultValue="Journey (few hotels)"
+            app:entries="@array/kind_of_trip_values"
+            app:entryValues="@array/kind_of_trip_values"
+            app:key="kind_of_trip"
+            app:title="Kind of trip"
             app:useSimpleSummaryProvider="true" />
 
         <ListPreference
@@ -18,13 +25,11 @@
 
         <SeekBarPreference
             android:key="kmRadius"
-            app:title="KM Radius"
+            app:title="Radius from searched location (KM)"
             app:showSeekBarValue="true"
             app:min="50"
             android:max="100000"
             android:defaultValue="150" />
-
-
 
         <EditTextPreference
             app:key="numOfDaysForTravel"
@@ -38,8 +43,6 @@
             app:title="Hours Of Travel"
             android:entries="@array/hoursOfTravel_values"
             android:entryValues="@array/hoursOfTravel_values" />
-
-
 
     </PreferenceCategory>
 

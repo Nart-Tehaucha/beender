@@ -400,7 +400,7 @@ public class DashboardFragment extends Fragment {
                         String pCity = temp.get("vicinity").toString();
                         String pCountry = temp.get("vicinity").toString();
                         Bitmap pImage = getPlacePhoto(((JSONObject) ((JSONArray) ((JSONObject) jarr.get(i)).get("photos")).get(0)).get("photo_reference").toString());
-                        items.add(new ItemModel(pImage, pName, pCity, pCountry));
+                        items.add(new ItemModel(pImage, pName, pCity, pCountry, "RANK AS STRING"));
                     }
                 }
 
