@@ -1,34 +1,34 @@
 package com.example.beender;
 
+import android.graphics.Bitmap;
+
 public class ItemModel {
-    private int image, image2, attractionID;
-    private String nama, usia, kota;
+    private Bitmap image;
+    private String name, city, country;
 
     public ItemModel() {
     }
 
-    public ItemModel(int image, int image2, String nama, String usia, String kota, int id) {
+    public ItemModel(Bitmap image, String name, String city, String country) {
         this.image = image;
-        this.image2 = image2;
-        this.nama = nama;
-        this.usia = usia;
-        this.kota = kota;
-        this.attractionID = id;
+        this.name = name;
+        this.city = city;
+        this.country = country;
     }
 
-    public int getImage() { return image; }
-
-    public int getImage2() { return image2; }
-
-    public String getNama() {
-        return nama;
+    public Bitmap getImage() {
+        return image;
     }
 
-    public String getUsia() {
-        return usia;
+    public String getName() {
+        return name;
     }
 
-    public String getKota() {
-        return kota;
+    public String getCity() {
+        return city;
+    }
+
+    public String getCountry() {
+        return country;
     }
 }
