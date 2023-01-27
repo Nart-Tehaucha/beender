@@ -50,7 +50,7 @@
         <item>Round (one hotel only)</item>
     </string-array>
 
-    <string-array name="type_values">
+    <string-array name="type_of_places_values">
         <item>Food</item>
         <item>Attraction</item>
         <item>Park</item>
@@ -58,6 +58,8 @@
         <item>Hiking</item>
         <item>Beach</item>
     </string-array>
+
+    <string-array name="empty_array"/>
 
     <string-array name="price_level_entries">
         <item>Free</item>
@@ -74,8 +76,4 @@
         <item>3</item>
         <item>4</item>
     </string-array>
-
-
-
-
 </resources>

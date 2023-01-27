@@ -67,13 +67,110 @@
 package com.example.beender;
 
 import android.os.Bundle;
+import android.widget.Toast;
 
+import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 
 public class SettingsFragment extends PreferenceFragmentCompat {
-
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         setPreferencesFromResource(R.xml.root_preferences, rootKey);
+
+        Preference kind_of_trip = (Preference) findPreference("kind_of_trip");
+        kind_of_trip.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object newValue) {
+                Toast.makeText(getContext(), newValue.toString(), Toast.LENGTH_SHORT).show();
+                return true;
+            }
+        });
+
+        Preference numOfPlacesPerDay = (Preference) findPreference("numOfPlacesPerDay");
+        numOfPlacesPerDay.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object newValue) {
+                Toast.makeText(getContext(), newValue.toString(), Toast.LENGTH_SHORT).show();
+                return true;
+            }
+        });
+
+        Preference kmRadius = (Preference) findPreference("kmRadius");
+        kmRadius.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object newValue) {
+                Toast.makeText(getContext(), newValue.toString(), Toast.LENGTH_SHORT).show();
+                return true;
+            }
+        });
+
+        Preference numOfDaysForTravel = (Preference) findPreference("numOfDaysForTravel");
+        numOfDaysForTravel.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object newValue) {
+                Toast.makeText(getContext(), newValue.toString(), Toast.LENGTH_SHORT).show();
+                return true;
+            }
+        });
+
+        Preference hoursOfTravel = (Preference) findPreference("hoursOfTravel");
+        hoursOfTravel.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object newValue) {
+                Toast.makeText(getContext(), newValue.toString(), Toast.LENGTH_SHORT).show();
+                return true;
+            }
+        });
+
+        Preference adaptedForChildren = (Preference) findPreference("adaptedForChildren");
+        adaptedForChildren.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object newValue) {
+                Toast.makeText(getContext(), newValue.toString(), Toast.LENGTH_SHORT).show();
+                return true;
+            }
+        });
+
+        Preference adaptedForElders = (Preference) findPreference("adaptedForElders");
+        adaptedForElders.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object newValue) {
+                Toast.makeText(getContext(), newValue.toString(), Toast.LENGTH_SHORT).show();
+                return true;
+            }
+        });
+
+        Preference adapteForAWheelchair = (Preference) findPreference("adapteForAWheelchair");
+        adapteForAWheelchair.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object newValue) {
+                Toast.makeText(getContext(), newValue.toString(), Toast.LENGTH_SHORT).show();
+                return true;
+            }
+        });
+        Preference ratingStar = (Preference) findPreference("ratingStar");
+        ratingStar.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object newValue) {
+                Toast.makeText(getContext(), newValue.toString(), Toast.LENGTH_SHORT).show();
+                return true;
+            }
+        });
+        Preference TypeOfPlaces = (Preference) findPreference("TypeOfPlaces");
+        TypeOfPlaces.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object newValue) {
+                Toast.makeText(getContext(), newValue.toString(), Toast.LENGTH_SHORT).show();
+                return true;
+            }
+        });
+        Preference priceLevel = (Preference) findPreference("priceLevel");
+        priceLevel.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object newValue) {
+                Toast.makeText(getContext(), newValue.toString(), Toast.LENGTH_SHORT).show();
+                return true;
+            }
+        });
     }
 }

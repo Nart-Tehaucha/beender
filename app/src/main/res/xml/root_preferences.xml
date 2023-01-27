@@ -42,7 +42,8 @@
             android:key="hoursOfTravel"
             app:title="Hours Of Travel"
             android:entries="@array/hoursOfTravel_values"
-            android:entryValues="@array/hoursOfTravel_values" />
+            android:entryValues="@array/hoursOfTravel_values"
+            android:defaultValue="@array/hoursOfTravel_values"/>
 
     </PreferenceCategory>
 
@@ -74,14 +75,15 @@
         <MultiSelectListPreference
             android:key="TypeOfPlaces"
             app:title="Type of Places"
-            android:entries="@array/type_values"
-            android:entryValues="@array/type_values" />
+            android:entries="@array/type_of_places_values"
+            android:entryValues="@array/type_of_places_values"
+            android:defaultValue="@array/empty_array"/>
 
         <MultiSelectListPreference
             android:key="priceLevel"
             app:title="Price Level"
             android:entries="@array/price_level_entries"
-            android:entryValues="@array/price_level_values"
+            android:entryValues="@array/price_level_entries"
             android:defaultValue="@array/price_level_entries"/>
 
     </PreferenceCategory>

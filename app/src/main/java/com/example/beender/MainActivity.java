@@ -1,5 +1,6 @@
 package com.example.beender;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -12,6 +13,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.NavigationUI;
+import androidx.preference.Preference;
+import androidx.preference.PreferenceManager;
 
 import com.example.beender.ui.dashboard.DashboardFragment;
 import com.google.android.gms.common.api.Status;
@@ -21,6 +24,8 @@ import com.google.android.libraries.places.widget.listener.PlaceSelectionListene
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -33,11 +38,38 @@ public class MainActivity extends AppCompatActivity {
         BottomNavigationView navView = findViewById(R.id.nav_view);
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
-
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         NavigationUI.setupWithNavController(navView, navController);
 
+        //Get user's preferences (from 'SETTINGS' fragment)
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
+        // enter the key from your xml and the default value
+        String kind_of_trip = sharedPreferences.getString("kind_of_trip","");
+        String numOfPlacesPerDay = sharedPreferences.getString("numOfPlacesPerDay","");
+        Integer kmRadius = sharedPreferences.getInt("kmRadius", 1 );
+        String numOfDaysForTravel = sharedPreferences.getString("numOfDaysForTravel","");
+        Set<String> hoursOfTravel = sharedPreferences.getStringSet("hoursOfTravel",new HashSet<>());
+        Boolean adaptedForChildren = sharedPreferences.getBoolean("adaptedForChildren",false);
+        Boolean adaptedForElders = sharedPreferences.getBoolean("adaptedForElders",false);
+        Boolean adapteForAWheelchair = sharedPreferences.getBoolean("adapteForAWheelchair",false);
+        String ratingStar = sharedPreferences.getString("ratingStar","");
+        Set<String> TypeOfPlaces = sharedPreferences.getStringSet("TypeOfPlaces",new HashSet<>());
+        Set<String>  priceLevel = sharedPreferences.getStringSet("priceLevel",new HashSet<>());
+
+        Log.i("kind_of_trip: " +kind_of_trip, "INFO");
+        Log.i("numOfPlacesPerDay: " + numOfPlacesPerDay, "INFO");
+        Log.i("kmRadius: " + kmRadius.toString(), "INFO");
+        Log.i("numOfDaysForTravel: " +numOfDaysForTravel, "INFO");
+        Log.i("hoursOfTravel: " + hoursOfTravel, "INFO");
+        Log.i("adaptedForChildren: " +adaptedForChildren, "INFO");
+        Log.i("adaptedForElders: " + adaptedForElders, "INFO");
+        Log.i("adapteForAWheelchair: " + adapteForAWheelchair, "INFO");
+        Log.i("ratingStar: " + ratingStar, "INFO");
+        Log.i("TypeOfPlaces: " + TypeOfPlaces, "INFO");
+        Log.i("priceLevel: " + priceLevel, "INFO");
     }
+
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
