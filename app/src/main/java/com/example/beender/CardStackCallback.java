@@ -4,6 +4,8 @@ import java.util.List;
 
 import androidx.recyclerview.widget.DiffUtil;
 
+import com.example.beender.model.ItemModel;
+
 public class CardStackCallback extends DiffUtil.Callback {
 
     private List<ItemModel> oldItem, newItem;

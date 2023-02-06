@@ -6,7 +6,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.squareup.picasso.Picasso;
+import com.example.beender.model.ItemModel;
 
 import java.util.List;
 
@@ -41,14 +41,14 @@ public class CardStackAdapter extends RecyclerView.Adapter<CardStackAdapter.View
 
     class ViewHolder extends RecyclerView.ViewHolder{
         ImageView image;
-        TextView name, city, country, ranking;
+        TextView name, city, country, rating;
         ViewHolder(@NonNull View itemView) {
             super(itemView);
             image = itemView.findViewById(R.id.item_image);
             name = itemView.findViewById(R.id.item_name);
             city = itemView.findViewById(R.id.item_city);
             country = itemView.findViewById(R.id.item_country);
-            ranking = itemView.findViewById(R.id.item_ranking);
+            rating = itemView.findViewById(R.id.item_rating);
         }
 
         void setData(ItemModel data) {
@@ -61,7 +61,7 @@ public class CardStackAdapter extends RecyclerView.Adapter<CardStackAdapter.View
             name.setText(data.getName());
             city.setText(data.getCity());
             country.setText(data.getCountry());
-            ranking.setText(data.getRanking());
+            rating.setText(data.getRating());
         }
     }
 
