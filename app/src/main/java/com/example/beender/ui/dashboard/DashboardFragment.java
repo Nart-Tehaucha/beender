@@ -22,7 +22,8 @@ import androidx.recyclerview.widget.DiffUtil;
 import com.example.beender.BuildConfig;
 import com.example.beender.CardStackAdapter;
 import com.example.beender.CardStackCallback;
-import com.example.beender.ItemModel;
+import com.example.beender.model.CurrentItems;
+import com.example.beender.model.ItemModel;
 import com.example.beender.R;
 
 import com.example.beender.util.FetchData;
@@ -59,6 +60,7 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
@@ -185,7 +187,7 @@ public class DashboardFragment extends Fragment {
         manager = new CardStackLayoutManager(getContext(), new CardStackListener() {
             @Override
             public void onCardDragging(Direction direction, float ratio) {
-                Log.d(TAG, "onCardDragging: d=" + direction.name() + " ratio=" + ratio);
+                //Log.d(TAG, "onCardDragging: d=" + direction.name() + " ratio=" + ratio);
             }
 
             @Override
@@ -193,6 +195,11 @@ public class DashboardFragment extends Fragment {
                 Log.d(TAG, "onCardSwiped: p=" + manager.getTopPosition() + " d=" + direction);
                 if (direction == Direction.Right){
                     //Toast.makeText(getContext(), "Direction Right " +currentCardAttractionID , Toast.LENGTH_SHORT).show();
+                    String name = CurrentItems.getInstance().getCurrSet().get(manager.getTopPosition() - 1).getName();
+                    double lat = CurrentItems.getInstance().getCurrSet().get(manager.getTopPosition() - 1).getLat();
+                    double lng = CurrentItems.getInstance().getCurrSet().get(manager.getTopPosition() - 1).getLng();
+                    Log.d(TAG,"SWIPE RIGHT NAME = " + name);
+                    Log.d(TAG,"SWIPE RIGHT LOCATION = " + "LAT: " + String.valueOf(lat) + " LNG: " + String.valueOf(lng));
                 }
                 if (direction == Direction.Top){
                     //Toast.makeText(getContext(), "Direction Top "+currentCardAttractionID, Toast.LENGTH_SHORT).show();
@@ -391,19 +398,26 @@ public class DashboardFragment extends Fragment {
                 Log.d(TAG, "ARR - " + jarr.get(0).toString());
 
 
+                // Create a list of ItemModel that contains all info of each Place we generated
                 List<ItemModel> items = new ArrayList<>();
                 for (int i=0; i < jarr.length(); i++) {
-                    //Log.d(TAG, "Item NUMBER " + i + "- " + jarr.get(i).toString());
+                    Log.d(TAG, "Item NUMBER " + i + "- " + jarr.get(i).toString());
                     if(((JSONObject) jarr.get(i)).has("photos")) {
                         JSONObject temp = jarr.getJSONObject(i);
                         String pName = temp.get("name").toString();
                         String pCity = temp.get("vicinity").toString();
                         String pCountry = temp.get("vicinity").toString();
+                        String pRating = temp.get("rating").toString();
                         Bitmap pImage = getPlacePhoto(((JSONObject) ((JSONArray) ((JSONObject) jarr.get(i)).get("photos")).get(0)).get("photo_reference").toString());
-                        items.add(new ItemModel(pImage, pName, pCity, pCountry, "RANK AS STRING"));
+                        double pLat = (Double) ((JSONObject) ((JSONObject) temp.get("geometry")).get("location")).get("lat");
+                        double pLng = (Double) ((JSONObject) ((JSONObject) temp.get("geometry")).get("location")).get("lng");
+
+                        items.add(new ItemModel(pImage, pName, pCity, pCountry, pRating, pLat, pLng));
                     }
                 }
 
+                // Update the singleton CurrentItems to contain our generated list of places
+                CurrentItems.getInstance().setCurrSet(new ArrayList<ItemModel>(items));
                 updateList(items);
 
 //                photoReference = ((JSONObject) ((JSONArray) ((JSONObject) jarr.get(0)).get("photos")).get(0)).get("photo_reference").toString();
