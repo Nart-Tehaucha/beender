@@ -15,7 +15,11 @@
         android:id="@+id/navigation_dashboard"
         android:name="com.example.beender.ui.dashboard.DashboardFragment"
         android:label="@string/title_dashboard"
-        tools:layout="@layout/fragment_dashboard" />
+        tools:layout="@layout/fragment_dashboard" >
+        <action
+            android:id="@+id/action_navigation_dashboard_to_navigation_map"
+            app:destination="@id/navigation_map" />
+    </fragment>
 
 
     <fragment
@@ -29,5 +33,10 @@
         android:name="com.example.beender.ArchiveFragment"
         android:label="Archive"
         tools:layout="@layout/fragment_archive" />
+    <fragment
+        android:id="@+id/mapsFragment"
+        android:name="com.example.beender.MapsFragment"
+        android:label="fragment_maps"
+        tools:layout="@layout/fragment_maps" />
 
 </navigation>

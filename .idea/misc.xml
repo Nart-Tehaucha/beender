@@ -3,7 +3,11 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/Users/Nart/AndroidStudioProjects/Beender/app/src/main/res/layout/activity_main.xml" value="0.26902173913043476" />
+        <entry key="..\:/Users/Nart/AndroidStudioProjects/Beender/app/src/main/res/layout/fragment_dashboard.xml" value="0.358695652173913" />
         <entry key="..\:/Users/Nart/AndroidStudioProjects/Beender/app/src/main/res/layout/fragment_home.xml" value="0.18110435663627153" />
+        <entry key="..\:/Users/Nart/AndroidStudioProjects/Beender/app/src/main/res/layout/fragment_maps.xml" value="0.33125" />
+        <entry key="..\:/Users/Nart/AndroidStudioProjects/Beender/app/src/main/res/layout/item_card.xml" value="0.358695652173913" />
         <entry key="..\:/Users/shaha/AndroidStudioProjects/beender/app/src/main/res/drawable-v24/ic_launcher_foreground.xml" value="0.1885" />
         <entry key="..\:/Users/shaha/AndroidStudioProjects/beender/app/src/main/res/drawable/gradation_black.xml" value="0.1885" />
         <entry key="..\:/Users/shaha/AndroidStudioProjects/beender/app/src/main/res/drawable/ic_arrow_back_black_24dp.xml" value="0.1" />

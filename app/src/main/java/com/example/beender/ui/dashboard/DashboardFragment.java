@@ -16,6 +16,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.DiffUtil;
 
@@ -31,13 +32,20 @@ import com.example.beender.util.FetchImage;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.maps.model.LatLng;
+//import com.google.android.gms.maps.model.LatLng;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.api.net.PlacesClient;
 import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.maps.DirectionsApi;
+import com.google.maps.DirectionsApiRequest;
+import com.google.maps.GeoApiContext;
+import com.google.maps.model.DirectionsResult;
+import com.google.maps.model.DirectionsRoute;
+import com.google.maps.model.LatLng;
+import com.google.maps.model.TravelMode;
 import com.yuyakaido.android.cardstackview.CardStackLayoutManager;
 import com.yuyakaido.android.cardstackview.CardStackListener;
 import com.yuyakaido.android.cardstackview.CardStackView;
@@ -58,6 +66,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -72,6 +81,8 @@ public class DashboardFragment extends Fragment {
     private String currentCardAttractionID;
     private FloatingActionButton btnStartTrip;
     private ImageView testIV;
+
+
 
     // The entry point to the Places API.
     private PlacesClient placesClient;
@@ -118,6 +129,7 @@ public class DashboardFragment extends Fragment {
         // Construct a FusedLocationProviderClient.
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(getContext());
 
+
     }
 
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -136,14 +148,16 @@ public class DashboardFragment extends Fragment {
         btnStartTrip.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // Initialize Places API request
-                // Prompt the user for permission.
-                getLocationPermission();
-                // [END_EXCLUDE]
+//                // Initialize Places API request
+//                // Prompt the user for permission.
+//                getLocationPermission();
+//                // [END_EXCLUDE]
+//
+//                Toast.makeText(getContext(), "Searching for cool places nearby...", Toast.LENGTH_SHORT).show();
+//                // Get the current location of the device and set the position of the map.
+//                getDeviceLocation();
 
-                Toast.makeText(getContext(), "Searching for cool places nearby...", Toast.LENGTH_SHORT).show();
-                // Get the current location of the device and set the position of the map.
-                getDeviceLocation();
+                Navigation.findNavController(view).navigate(R.id.action_navigation_dashboard_to_navigation_map);
             }
         });
 
@@ -407,7 +421,10 @@ public class DashboardFragment extends Fragment {
                         String pName = temp.get("name").toString();
                         String pCity = temp.get("vicinity").toString();
                         String pCountry = temp.get("vicinity").toString();
-                        String pRating = temp.get("rating").toString();
+                        String pRating = "No Rating";
+                        if(temp.has("rating")) {
+                            pRating = temp.get("rating").toString();
+                        }
                         Bitmap pImage = getPlacePhoto(((JSONObject) ((JSONArray) ((JSONObject) jarr.get(i)).get("photos")).get(0)).get("photo_reference").toString());
                         double pLat = (Double) ((JSONObject) ((JSONObject) temp.get("geometry")).get("location")).get("lat");
                         double pLng = (Double) ((JSONObject) ((JSONObject) temp.get("geometry")).get("location")).get("lng");
@@ -452,6 +469,8 @@ public class DashboardFragment extends Fragment {
 
         //testIV.setImageBitmap(fetchImage.get());
     }
+
+
 
 
 }
