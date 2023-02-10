@@ -44,5 +44,8 @@
     <string name="menu_slideshow">Slideshow</string>
     <string name="test_string">test</string>
     <string name="ranking_icon">⭐</string>
+    <string name="markerOk">Remove</string>
+    <string name="markerCancel">Cancel</string>
+    <string name="markerDialogMessage">Are you sure you want to remove this destination?</string>
 
 </resources>

@@ -33,10 +33,5 @@
         android:name="com.example.beender.ArchiveFragment"
         android:label="Archive"
         tools:layout="@layout/fragment_archive" />
-    <fragment
-        android:id="@+id/mapsFragment"
-        android:name="com.example.beender.MapsFragment"
-        android:label="fragment_maps"
-        tools:layout="@layout/fragment_maps" />
 
 </navigation>

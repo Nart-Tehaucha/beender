@@ -47,4 +47,8 @@ public class ItemModel {
     public double getLng() {
         return lng;
     }
+
+    public String printPosition() {
+        return String.valueOf(lat) + "," + String.valueOf(lng);
+    }
 }

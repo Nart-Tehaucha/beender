@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.LinearInterpolator;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -80,6 +81,7 @@ public class DashboardFragment extends Fragment {
     private CardStackAdapter adapter;
     private String currentCardAttractionID;
     private FloatingActionButton btnStartTrip;
+    private Button btnFinish;
     private ImageView testIV;
 
 
@@ -144,21 +146,27 @@ public class DashboardFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+
+        btnFinish = view.findViewById(R.id.btnFinish);
+        btnFinish.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(CurrentItems.getInstance().getSwipedRight().isEmpty()) {
+                    Toast.makeText(getContext(), "Pick at least two places!", Toast.LENGTH_SHORT).show();
+                } else {
+                    Navigation.findNavController(view).navigate(R.id.action_navigation_dashboard_to_navigation_map);
+                }
+            }
+
+        });
+
         btnStartTrip = view.findViewById(R.id.btnStartTrip);
         btnStartTrip.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-//                // Initialize Places API request
-//                // Prompt the user for permission.
-//                getLocationPermission();
-//                // [END_EXCLUDE]
-//
-//                Toast.makeText(getContext(), "Searching for cool places nearby...", Toast.LENGTH_SHORT).show();
-//                // Get the current location of the device and set the position of the map.
-//                getDeviceLocation();
-
                 Navigation.findNavController(view).navigate(R.id.action_navigation_dashboard_to_navigation_map);
             }
+
         });
 
         // Initialize the AutocompleteSupportFragment.
@@ -208,12 +216,17 @@ public class DashboardFragment extends Fragment {
             public void onCardSwiped(Direction direction) {
                 Log.d(TAG, "onCardSwiped: p=" + manager.getTopPosition() + " d=" + direction);
                 if (direction == Direction.Right){
-                    //Toast.makeText(getContext(), "Direction Right " +currentCardAttractionID , Toast.LENGTH_SHORT).show();
-                    String name = CurrentItems.getInstance().getCurrSet().get(manager.getTopPosition() - 1).getName();
-                    double lat = CurrentItems.getInstance().getCurrSet().get(manager.getTopPosition() - 1).getLat();
-                    double lng = CurrentItems.getInstance().getCurrSet().get(manager.getTopPosition() - 1).getLng();
+                    ItemModel currentItem = CurrentItems.getInstance().getCurrSet().get(manager.getTopPosition() - 1);
+
+                    String name = currentItem.getName();
+                    double lat = currentItem.getLat();
+                    double lng = currentItem.getLng();
                     Log.d(TAG,"SWIPE RIGHT NAME = " + name);
                     Log.d(TAG,"SWIPE RIGHT LOCATION = " + "LAT: " + String.valueOf(lat) + " LNG: " + String.valueOf(lng));
+
+                    CurrentItems.getInstance().getSwipedRight().add(currentItem);
+
+                    Log.d(TAG,CurrentItems.getInstance().getSwipedRight().toString());
                 }
                 if (direction == Direction.Top){
                     //Toast.makeText(getContext(), "Direction Top "+currentCardAttractionID, Toast.LENGTH_SHORT).show();
