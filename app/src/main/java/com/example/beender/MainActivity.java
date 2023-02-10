@@ -22,6 +22,7 @@ import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.maps.GeoApiContext;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -30,6 +31,7 @@ import java.util.Set;
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = DashboardFragment.class.getSimpleName();
+    public static final GeoApiContext gaContext = new GeoApiContext.Builder().apiKey(BuildConfig.MAPS_API_KEY).build();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

@@ -3,6 +3,7 @@ package com.example.beender.model;
 import com.google.maps.model.LatLng;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
@@ -11,16 +12,18 @@ public class CurrentItems {
     // of type Singleton
     private static CurrentItems single_instance = null;
 
-    private ArrayList<ItemModel> swipedRight;
-    private ArrayList<ItemModel> currSet;
+    private HashMap<Integer, ArrayList<ItemModel>> currStack;
+    private ArrayList<ItemModel> currStackHotels;
+    private HashMap<Integer, ArrayList<ItemModel>> swipedRight;
 
     // Constructor
     // Here we will be creating private constructor
     // restricted to this class itself
     private CurrentItems()
     {
-        currSet = new ArrayList<>();
-        swipedRight = new ArrayList<>();
+        currStack = new HashMap<>();
+        currStackHotels = new ArrayList<>();
+        swipedRight = new HashMap<>();
     }
 
     // Static method
@@ -33,22 +36,39 @@ public class CurrentItems {
         return single_instance;
     }
 
-    public ArrayList<ItemModel> getCurrSet() {
-        return currSet;
+//    public ArrayList<ItemModel> getSwipedRight() {
+//        return swipedRight;
+//    }
+//
+//    public void setSwipedRight(ArrayList<ItemModel> swipedRight) {
+//        this.swipedRight = swipedRight;
+//    }
+
+
+    public HashMap<Integer, ArrayList<ItemModel>> getSwipedRight() {
+        return swipedRight;
     }
 
-    public void setCurrSet(ArrayList<ItemModel> currSet) {
-        this.currSet = currSet;
+    public void setSwipedRight(HashMap<Integer, ArrayList<ItemModel>> swipedRight) {
+        this.swipedRight = swipedRight;
     }
 
-    public ArrayList<ItemModel> getSwipedRight() { return swipedRight; }
+    public HashMap<Integer, ArrayList<ItemModel>> getCurrStack() {
+        return currStack;
+    }
 
-    public void setSwipedRight(ArrayList<ItemModel> swipedRight) { this.swipedRight = swipedRight; }
+    public ArrayList<ItemModel> getCurrStackHotels() {
+        return currStackHotels;
+    }
 
-    public List<LatLng> getAsLatLng () {
+    public void setCurrStackHotels(ArrayList<ItemModel> currStackHotels) {
+        this.currStackHotels = currStackHotels;
+    }
+
+    public List<LatLng> getAsLatLng (int day) {
         if(swipedRight != null) {
             List<LatLng> list = new ArrayList<>();
-            for(ItemModel item : swipedRight) {
+            for(ItemModel item : swipedRight.get(day)) {
                 list.add(new LatLng(item.getLat(), item.getLng()));
             }
             return list;

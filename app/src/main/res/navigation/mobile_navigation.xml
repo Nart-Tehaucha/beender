@@ -9,7 +9,12 @@
         android:id="@+id/navigation_map"
         android:name="com.example.beender.MapFragment"
         android:label="@string/title_map"
-        tools:layout="@layout/fragment_map" />
+        tools:layout="@layout/fragment_map" >
+        <action
+            android:id="@+id/action_navigation_map_to_hotelSearchFragment"
+            app:destination="@id/hotelSearchFragment"
+            app:enterAnim="@android:anim/fade_in" />
+    </fragment>
 
     <fragment
         android:id="@+id/navigation_dashboard"
@@ -19,6 +24,9 @@
         <action
             android:id="@+id/action_navigation_dashboard_to_navigation_map"
             app:destination="@id/navigation_map" />
+        <action
+            android:id="@+id/action_navigation_dashboard_to_hotelSearchFragment"
+            app:destination="@id/hotelSearchFragment" />
     </fragment>
 
 
@@ -33,5 +41,14 @@
         android:name="com.example.beender.ArchiveFragment"
         android:label="Archive"
         tools:layout="@layout/fragment_archive" />
+    <fragment
+        android:id="@+id/hotelSearchFragment"
+        android:name="com.example.beender.HotelSearchFragment"
+        android:label="HotelSearchFragment" >
+        <action
+            android:id="@+id/action_hotelSearchFragment_to_navigation_map"
+            app:destination="@id/navigation_map"
+            app:enterAnim="@android:anim/fade_in" />
+    </fragment>
 
 </navigation>

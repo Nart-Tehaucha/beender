@@ -10,6 +10,7 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.navigation.Navigation;
 
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -40,12 +41,12 @@ import com.google.maps.model.TravelMode;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 
 public class MapFragment extends Fragment {
 
     private static final String TAG = DashboardFragment.class.getSimpleName();
-    final GeoApiContext context = new GeoApiContext.Builder().apiKey(BuildConfig.MAPS_API_KEY).build();
     private GoogleMap mMap;
 
     List<com.google.maps.model.LatLng> swipedRight;
@@ -70,7 +71,7 @@ public class MapFragment extends Fragment {
             public void onMapReady(GoogleMap googleMap) {
                 mMap = googleMap;
                 if(!CurrentItems.getInstance().getSwipedRight().isEmpty()) {
-                    getDirections();
+                    getDirections(view);
                 }
             }
         });
@@ -78,10 +79,10 @@ public class MapFragment extends Fragment {
         return view;
     }
 
-    private void getDirections() {
+    private void getDirections(View view) {
         polylineOptions = new PolylineOptions();
 
-        swipedRight = CurrentItems.getInstance().getAsLatLng();
+        swipedRight = CurrentItems.getInstance().getAsLatLng(0);
 
         com.google.maps.model.LatLng origin = swipedRight.get(0);
         com.google.maps.model.LatLng destination = swipedRight.get(swipedRight.size()-1);
@@ -107,7 +108,7 @@ public class MapFragment extends Fragment {
 
         // Create a request for calculating and returning the final route
         DirectionsApiRequest request =
-                DirectionsApi.newRequest(context)
+                DirectionsApi.newRequest(MainActivity.gaContext)
                         .origin(origin)
                         .destination(destination)
                         .waypoints(mWaypoints.toArray(new com.google.maps.model.LatLng[0]))
@@ -145,30 +146,26 @@ public class MapFragment extends Fragment {
             public boolean onMarkerClick(com.google.android.gms.maps.model.Marker marker) {
 
                 AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                builder.setMessage(R.string.markerDialogMessage)
-                .setCancelable(true)
-                .setPositiveButton(R.string.markerOk, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        // User clicked OK button
-                        int markerIndex = (Integer) marker.getTag();
-
-                        if(CurrentItems.getInstance().getSwipedRight().size() <=2) {
-                            Toast.makeText(getContext(), "There has to be at least two destinations!", Toast.LENGTH_SHORT).show();
-                        } else {
-                            CurrentItems.getInstance().getSwipedRight().remove(markerIndex);
-                            mMap.clear();
-                            getDirections();
-                        }
-                    }
-                })
-                .setNegativeButton(R.string.markerCancel, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        // User cancelled the dialog
-                        dialog.cancel();
-                    }
-                });
-
-                // Create the AlertDialog
+                builder.setTitle("Choose:")
+                        .setItems(R.array.marker_options_array, new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                int markerIndex = (Integer) marker.getTag();
+                                switch(which) {
+                                    case 0:
+                                        CurrentItems.getInstance().getSwipedRight().get(0).remove(markerIndex);
+                                        mMap.clear();
+                                        getDirections(view);
+                                        break;
+                                    case 1:
+                                        com.google.maps.model.LatLng hotelLatLng = new com.google.maps.model.LatLng(CurrentItems.getInstance().getSwipedRight().get(0).get(markerIndex).getLat(), CurrentItems.getInstance().getSwipedRight().get(0).get(markerIndex).getLng());
+                                        Bundle bundle = new Bundle();
+                                        bundle.putDoubleArray("latlng", new double[]{hotelLatLng.lat, hotelLatLng.lng});
+                                        bundle.putInt("markerIndex", markerIndex);
+                                        Navigation.findNavController(view).navigate(R.id.action_navigation_map_to_hotelSearchFragment, bundle);
+                                        break;
+                                }
+                            }
+                        });
                 AlertDialog dialog = builder.create();
                 dialog.show();
                 return true;

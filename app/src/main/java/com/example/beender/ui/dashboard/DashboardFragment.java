@@ -1,5 +1,6 @@
 package com.example.beender.ui.dashboard;
 
+import android.annotation.SuppressLint;
 import android.graphics.Bitmap;
 import android.location.Location;
 import android.os.AsyncTask;
@@ -24,6 +25,7 @@ import androidx.recyclerview.widget.DiffUtil;
 import com.example.beender.BuildConfig;
 import com.example.beender.CardStackAdapter;
 import com.example.beender.CardStackCallback;
+import com.example.beender.MainActivity;
 import com.example.beender.model.CurrentItems;
 import com.example.beender.model.ItemModel;
 import com.example.beender.R;
@@ -43,9 +45,15 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.maps.DirectionsApi;
 import com.google.maps.DirectionsApiRequest;
 import com.google.maps.GeoApiContext;
+import com.google.maps.NearbySearchRequest;
+import com.google.maps.PlacesApi;
 import com.google.maps.model.DirectionsResult;
 import com.google.maps.model.DirectionsRoute;
 import com.google.maps.model.LatLng;
+import com.google.maps.model.PlaceType;
+import com.google.maps.model.PlacesSearchResponse;
+import com.google.maps.model.PlacesSearchResult;
+import com.google.maps.model.RankBy;
 import com.google.maps.model.TravelMode;
 import com.yuyakaido.android.cardstackview.CardStackLayoutManager;
 import com.yuyakaido.android.cardstackview.CardStackListener;
@@ -164,7 +172,9 @@ public class DashboardFragment extends Fragment {
         btnStartTrip.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Navigation.findNavController(view).navigate(R.id.action_navigation_dashboard_to_navigation_map);
+//                Bundle bundle = new Bundle();
+//                bundle.putDoubleArray("latlng", new double[]{53.341050, -6.262876});
+//                Navigation.findNavController(view).navigate(R.id.action_navigation_dashboard_to_hotelSearchFragment, bundle);
             }
 
         });
@@ -216,17 +226,18 @@ public class DashboardFragment extends Fragment {
             public void onCardSwiped(Direction direction) {
                 Log.d(TAG, "onCardSwiped: p=" + manager.getTopPosition() + " d=" + direction);
                 if (direction == Direction.Right){
-                    ItemModel currentItem = CurrentItems.getInstance().getCurrSet().get(manager.getTopPosition() - 1);
 
-                    String name = currentItem.getName();
-                    double lat = currentItem.getLat();
-                    double lng = currentItem.getLng();
-                    Log.d(TAG,"SWIPE RIGHT NAME = " + name);
-                    Log.d(TAG,"SWIPE RIGHT LOCATION = " + "LAT: " + String.valueOf(lat) + " LNG: " + String.valueOf(lng));
+                    ItemModel swipedItem = adapter.getItems().get(manager.getTopPosition() - 1);
 
-                    CurrentItems.getInstance().getSwipedRight().add(currentItem);
+                    if(!CurrentItems.getInstance().getSwipedRight().containsKey(0)) {
+                        CurrentItems.getInstance().getSwipedRight().put(0, new ArrayList<>());
+                    }
+                    CurrentItems.getInstance().getSwipedRight().get(0).add(swipedItem);
 
-                    Log.d(TAG,CurrentItems.getInstance().getSwipedRight().toString());
+                    if(swipedItem.getType() == 1) {
+                        CurrentItems.getInstance().setCurrStackHotels(new ArrayList<>());
+                        updateList(new ArrayList<>());
+                    }
                 }
                 if (direction == Direction.Top){
                     //Toast.makeText(getContext(), "Direction Top "+currentCardAttractionID, Toast.LENGTH_SHORT).show();
@@ -240,7 +251,7 @@ public class DashboardFragment extends Fragment {
 
                 // Paginating
                 if (manager.getTopPosition() == adapter.getItemCount() - 5){
-                    paginate();
+//                    paginate();
                 }
 
             }
@@ -284,15 +295,15 @@ public class DashboardFragment extends Fragment {
         cardStackView.setItemAnimator(new DefaultItemAnimator());
     }
 
-    private void paginate() {
-        List<ItemModel> oldList = adapter.getItems();
-        List<ItemModel> newList = new ArrayList<>(addList());
-        CardStackCallback callback = new CardStackCallback(oldList, newList);
-        DiffUtil.DiffResult results = DiffUtil.calculateDiff(callback);
-        adapter.setItems(newList);
-        results.dispatchUpdatesTo(adapter);
-    }
-
+//    private void paginate() {
+//        List<ItemModel> oldList = adapter.getItems();
+//        List<ItemModel> newList = new ArrayList<>(addList());
+//        CardStackCallback callback = new CardStackCallback(oldList, newList);
+//        DiffUtil.DiffResult results = DiffUtil.calculateDiff(callback);
+//        adapter.setItems(newList);
+//        results.dispatchUpdatesTo(adapter);
+//    }
+//
     private List<ItemModel> addList() {
         List<ItemModel> items = new ArrayList<>();
         return items;
@@ -317,7 +328,7 @@ public class DashboardFragment extends Fragment {
          */
         try {
             if (locationPermissionGranted) {
-                Task<Location> locationResult = fusedLocationProviderClient.getLastLocation();
+                @SuppressLint("MissingPermission") Task<Location> locationResult = fusedLocationProviderClient.getLastLocation();
                 locationResult.addOnCompleteListener(getActivity(), new OnCompleteListener<Location>() {
                     @Override
                     public void onComplete(@NonNull Task<Location> task) {
@@ -395,13 +406,10 @@ public class DashboardFragment extends Fragment {
      */
     public void getNearbyPlaces(double lat, double lng) throws ExecutionException, InterruptedException {
         StringBuilder stringBuilder = new StringBuilder("https://maps.googleapis.com/maps/api/place/nearbysearch/json?");
-        //stringBuilder.append("location=" + "32.804653, 34.999608"); // Test location for London.
         stringBuilder.append("location=" + lat + "," + lng);
         stringBuilder.append("&radius=3500");
         stringBuilder.append("&type=tourist_attraction");
         stringBuilder.append("&key=" + BuildConfig.MAPS_API_KEY);
-
-        //String tstUrl = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=-33.8670522%2C151.1957362&radius=1500&type=restaurant&keyword=cruise&key=" + BuildConfig.MAPS_API_KEY;
 
         String url = stringBuilder.toString();
         Object dataFetch[] = new Object[2];
@@ -442,25 +450,56 @@ public class DashboardFragment extends Fragment {
                         double pLat = (Double) ((JSONObject) ((JSONObject) temp.get("geometry")).get("location")).get("lat");
                         double pLng = (Double) ((JSONObject) ((JSONObject) temp.get("geometry")).get("location")).get("lng");
 
-                        items.add(new ItemModel(pImage, pName, pCity, pCountry, pRating, pLat, pLng));
+                        items.add(new ItemModel(pImage, pName, pCity, pCountry, pRating, pLat, pLng, 0));
                     }
                 }
 
                 // Update the singleton CurrentItems to contain our generated list of places
-                CurrentItems.getInstance().setCurrSet(new ArrayList<ItemModel>(items));
+                CurrentItems.getInstance().getCurrStack().put(0, new ArrayList<>(items));
                 updateList(items);
 
-//                photoReference = ((JSONObject) ((JSONArray) ((JSONObject) jarr.get(0)).get("photos")).get(0)).get("photo_reference").toString();
-//
-//                getPlacePhoto(photoReference);
-//                Log.d(TAG, "REF - " + photoReference);
             } catch (JSONException | IOException e) {
                 e.printStackTrace();
             }
         }
+    }
 
+    public void getNearbyHotels(LatLng location) throws ExecutionException, InterruptedException {
+        NearbySearchRequest request = PlacesApi.nearbySearchQuery(MainActivity.gaContext, location)
+                .radius(3500)
+                .rankby(RankBy.PROMINENCE)
+                .type(PlaceType.LODGING);
+        try {
+            PlacesSearchResponse response = request.await();
+            for(PlacesSearchResult r : response.results) {
+                Log.d(TAG, "Vicinity: " + r.vicinity + " Geometry: " + r.geometry.location);
+            }
 
-        //Toast.makeText(getContext(), "HTTP SUCCESS ", Toast.LENGTH_SHORT).show() ;
+            // Create a list of ItemModel that contains all info of each Place we generated
+            List<ItemModel> items = new ArrayList<>();
+            for (PlacesSearchResult r : response.results) {
+                if(r.photos.length != 0) {
+                    String pName = r.name;
+                    String pCity = r.vicinity;
+                    String pCountry = r.vicinity;
+                    String pRating = "No Rating";
+                    if(r.userRatingsTotal != 0) {
+                        pRating = String.valueOf(r.rating);
+                    }
+                    Bitmap pImage = getPlacePhoto(r.photos[0].photoReference);
+                    double pLat = r.geometry.location.lat;
+                    double pLng = r.geometry.location.lng;
+
+                    items.add(new ItemModel(pImage, pName, pCity, pCountry, pRating, pLat, pLng, 1));
+                }
+
+                // Update the singleton CurrentItems to contain our generated list of places
+                CurrentItems.getInstance().setCurrStackHotels(new ArrayList<>(items));
+                updateList(items);
+            }
+        } catch (Exception e) {
+            throw new IllegalStateException(e);
+        }
     }
 
     // Recieves a photo_reference of a place, sends an HTTP request to Places API, and converts the result to a Bitmap photo.
