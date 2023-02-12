@@ -140,7 +140,7 @@ public class SettingsFragment extends PreferenceFragmentCompat {
             }
         });
 
-        Preference adapteForAWheelchair = (Preference) findPreference("adapteForAWheelchair");
+        Preference adapteForAWheelchair = (Preference) findPreference("adaptedForAWheelchair");
         adapteForAWheelchair.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
             @Override
             public boolean onPreferenceChange(Preference preference, Object newValue) {

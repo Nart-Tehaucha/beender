@@ -27,6 +27,9 @@
         <action
             android:id="@+id/action_navigation_dashboard_to_hotelSearchFragment"
             app:destination="@id/hotelSearchFragment" />
+        <action
+            android:id="@+id/action_navigation_dashboard_to_attractionPageFragment"
+            app:destination="@id/attractionPageFragment" />
     </fragment>
 
 
@@ -50,5 +53,9 @@
             app:destination="@id/navigation_map"
             app:enterAnim="@android:anim/fade_in" />
     </fragment>
+    <fragment
+        android:id="@+id/attractionPageFragment"
+        android:name="com.example.beender.AttractionPage"
+        tools:layout="@layout/fragment_attraction_page" />
 
 </navigation>

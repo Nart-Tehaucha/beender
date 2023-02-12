@@ -17,6 +17,7 @@ import androidx.preference.Preference;
 import androidx.preference.PreferenceManager;
 
 import com.example.beender.ui.dashboard.DashboardFragment;
+import com.example.beender.util.Settings;
 import com.google.android.gms.common.api.Status;
 import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
@@ -32,6 +33,7 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = DashboardFragment.class.getSimpleName();
     public static final GeoApiContext gaContext = new GeoApiContext.Builder().apiKey(BuildConfig.MAPS_API_KEY).build();
+    private Settings settings;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,31 +46,19 @@ public class MainActivity extends AppCompatActivity {
         NavigationUI.setupWithNavController(navView, navController);
 
         //Get user's preferences (from 'SETTINGS' fragment)
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
-        // enter the key from your xml and the default value
-        String kind_of_trip = sharedPreferences.getString("kind_of_trip","");
-        String numOfPlacesPerDay = sharedPreferences.getString("numOfPlacesPerDay","");
-        Integer kmRadius = sharedPreferences.getInt("kmRadius", 1 );
-        String numOfDaysForTravel = sharedPreferences.getString("numOfDaysForTravel","");
-        Set<String> hoursOfTravel = sharedPreferences.getStringSet("hoursOfTravel",new HashSet<>());
-        Boolean adaptedForChildren = sharedPreferences.getBoolean("adaptedForChildren",false);
-        Boolean adaptedForElders = sharedPreferences.getBoolean("adaptedForElders",false);
-        Boolean adapteForAWheelchair = sharedPreferences.getBoolean("adapteForAWheelchair",false);
-        String ratingStar = sharedPreferences.getString("ratingStar","");
-        Set<String> TypeOfPlaces = sharedPreferences.getStringSet("TypeOfPlaces",new HashSet<>());
-        Set<String>  priceLevel = sharedPreferences.getStringSet("priceLevel",new HashSet<>());
+        this.settings = new Settings(this);
 
-        Log.i("kind_of_trip: " +kind_of_trip, "INFO");
-        Log.i("numOfPlacesPerDay: " + numOfPlacesPerDay, "INFO");
-        Log.i("kmRadius: " + kmRadius.toString(), "INFO");
-        Log.i("numOfDaysForTravel: " +numOfDaysForTravel, "INFO");
-        Log.i("hoursOfTravel: " + hoursOfTravel, "INFO");
-        Log.i("adaptedForChildren: " +adaptedForChildren, "INFO");
-        Log.i("adaptedForElders: " + adaptedForElders, "INFO");
-        Log.i("adapteForAWheelchair: " + adapteForAWheelchair, "INFO");
-        Log.i("ratingStar: " + ratingStar, "INFO");
-        Log.i("TypeOfPlaces: " + TypeOfPlaces, "INFO");
-        Log.i("priceLevel: " + priceLevel, "INFO");
+        Log.i("kind_of_trip: " +settings.getKindOfTrip(), "INFO");
+        Log.i("numOfPlacesPerDay: " + settings.getNumOfPlacesPerDay(), "INFO");
+        Log.i("kmRadius: " + settings.getKmRadius().toString(), "INFO");
+        Log.i("numOfDaysForTravel: " +settings.getNumOfDaysForTravel(), "INFO");
+        Log.i("hoursOfTravel: " + settings.getHoursOfTravel(), "INFO");
+        Log.i("adaptedForChildren: " +settings.getAdaptedForChildren(), "INFO");
+        Log.i("adaptedForElders: " + settings.getAdaptedForElders(), "INFO");
+        Log.i("adapteForAWheelchair: " + settings.getAdaptedForAWheelchair(), "INFO");
+        Log.i("ratingStar: " + settings.getRatingStar(), "INFO");
+        Log.i("TypeOfPlaces: " + settings.getTypeOfPlaces(), "INFO");
+        Log.i("priceLevel: " + settings.getPriceLevel(), "INFO");
     }
 
 
