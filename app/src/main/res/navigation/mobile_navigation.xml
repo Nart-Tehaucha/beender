@@ -49,6 +49,10 @@
             android:id="@+id/action_hotelSearchFragment_to_navigation_map"
             app:destination="@id/navigation_map"
             app:enterAnim="@android:anim/fade_in" />
+        <action
+            android:id="@+id/action_hotelSearchFragment_to_navigation_dashboard"
+            app:destination="@id/navigation_dashboard"
+            app:enterAnim="@android:anim/fade_in" />
     </fragment>
 
 </navigation>

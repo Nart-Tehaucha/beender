@@ -32,6 +32,10 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = DashboardFragment.class.getSimpleName();
     public static final GeoApiContext gaContext = new GeoApiContext.Builder().apiKey(BuildConfig.MAPS_API_KEY).build();
+    public static int routeType; // 0 - Normal, 1 - Star
+
+    //Get user's preferences (from 'SETTINGS' fragment)
+    SharedPreferences sharedPreferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,31 +47,23 @@ public class MainActivity extends AppCompatActivity {
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         NavigationUI.setupWithNavController(navView, navController);
 
-        //Get user's preferences (from 'SETTINGS' fragment)
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+
         // enter the key from your xml and the default value
         String kind_of_trip = sharedPreferences.getString("kind_of_trip","");
         String numOfPlacesPerDay = sharedPreferences.getString("numOfPlacesPerDay","");
         Integer kmRadius = sharedPreferences.getInt("kmRadius", 1 );
         String numOfDaysForTravel = sharedPreferences.getString("numOfDaysForTravel","");
-        Set<String> hoursOfTravel = sharedPreferences.getStringSet("hoursOfTravel",new HashSet<>());
-        Boolean adaptedForChildren = sharedPreferences.getBoolean("adaptedForChildren",false);
-        Boolean adaptedForElders = sharedPreferences.getBoolean("adaptedForElders",false);
-        Boolean adapteForAWheelchair = sharedPreferences.getBoolean("adapteForAWheelchair",false);
+        Boolean adaptedForAWheelchair = sharedPreferences.getBoolean("adaptedForAWheelchair",false);
         String ratingStar = sharedPreferences.getString("ratingStar","");
-        Set<String> TypeOfPlaces = sharedPreferences.getStringSet("TypeOfPlaces",new HashSet<>());
         Set<String>  priceLevel = sharedPreferences.getStringSet("priceLevel",new HashSet<>());
 
         Log.i("kind_of_trip: " +kind_of_trip, "INFO");
         Log.i("numOfPlacesPerDay: " + numOfPlacesPerDay, "INFO");
         Log.i("kmRadius: " + kmRadius.toString(), "INFO");
         Log.i("numOfDaysForTravel: " +numOfDaysForTravel, "INFO");
-        Log.i("hoursOfTravel: " + hoursOfTravel, "INFO");
-        Log.i("adaptedForChildren: " +adaptedForChildren, "INFO");
-        Log.i("adaptedForElders: " + adaptedForElders, "INFO");
-        Log.i("adapteForAWheelchair: " + adapteForAWheelchair, "INFO");
+        Log.i("adaptedForAWheelchair: " + adaptedForAWheelchair, "INFO");
         Log.i("ratingStar: " + ratingStar, "INFO");
-        Log.i("TypeOfPlaces: " + TypeOfPlaces, "INFO");
         Log.i("priceLevel: " + priceLevel, "INFO");
     }
 

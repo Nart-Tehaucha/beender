@@ -19,6 +19,7 @@ import com.example.beender.model.CurrentItems;
 import com.example.beender.model.ItemModel;
 import com.example.beender.ui.dashboard.DashboardFragment;
 import com.example.beender.util.FetchImage;
+import com.example.beender.util.SearchNearby;
 import com.google.maps.NearbySearchRequest;
 import com.google.maps.PlacesApi;
 import com.google.maps.model.LatLng;
@@ -86,15 +87,18 @@ public class HotelSearchFragment extends Fragment {
 
                     ItemModel swipedItem = adapter.getItems().get(manager.getTopPosition() - 1);
 
-                    if(!CurrentItems.getInstance().getSwipedRight().containsKey(0)) {
-                        CurrentItems.getInstance().getSwipedRight().put(0, new ArrayList<>());
-                    }
                     CurrentItems.getInstance().getSwipedRight().get(0).add(markerIndex, swipedItem);
+                    CurrentItems.getInstance().setChosenHotel(swipedItem);
 
+                    // If a hotel was swiped right, reset the card stack and navigate back to the map fragment
                     if(swipedItem.getType() == 1) {
                         CurrentItems.getInstance().setCurrStackHotels(new ArrayList<>());
                         updateList(new ArrayList<>());
-                        Navigation.findNavController(root).navigate(R.id.action_hotelSearchFragment_to_navigation_map);
+                        if(getArguments().getString("parentFrag").equals("map")) {
+                            Navigation.findNavController(root).navigate(R.id.action_hotelSearchFragment_to_navigation_map);
+                        } else {
+                            Navigation.findNavController(root).navigate(R.id.action_hotelSearchFragment_to_navigation_dashboard);
+                        }
                     }
                 }
                 if (direction == Direction.Top){
@@ -153,7 +157,7 @@ public class HotelSearchFragment extends Fragment {
         cardStackView.setItemAnimator(new DefaultItemAnimator());
 
         com.google.maps.model.LatLng location = new LatLng(getArguments().getDoubleArray("latlng")[0], getArguments().getDoubleArray("latlng")[1]);
-        getNearbyHotels(location);
+        updateList(SearchNearby.getNearbyHotels(location));
     }
 
     private List<ItemModel> addList() {
@@ -167,64 +171,6 @@ public class HotelSearchFragment extends Fragment {
         DiffUtil.DiffResult results = DiffUtil.calculateDiff(callback);
         adapter.setItems(newList);
         results.dispatchUpdatesTo(adapter);
-    }
-
-    public void getNearbyHotels(LatLng location) throws ExecutionException, InterruptedException {
-        NearbySearchRequest request = PlacesApi.nearbySearchQuery(MainActivity.gaContext, location)
-                .radius(3500)
-                .rankby(RankBy.PROMINENCE)
-                .type(PlaceType.LODGING);
-        try {
-            PlacesSearchResponse response = request.await();
-            for(PlacesSearchResult r : response.results) {
-                Log.d(TAG, "Vicinity: " + r.vicinity + " Geometry: " + r.geometry.location);
-            }
-
-            // Create a list of ItemModel that contains all info of each Place we generated
-            List<ItemModel> items = new ArrayList<>();
-            for (PlacesSearchResult r : response.results) {
-                if(r.photos.length != 0) {
-                    String pName = r.name;
-                    String pCity = r.vicinity;
-                    String pCountry = r.vicinity;
-                    String pRating = "No Rating";
-                    if(r.userRatingsTotal != 0) {
-                        pRating = String.valueOf(r.rating);
-                    }
-                    Bitmap pImage = getPlacePhoto(r.photos[0].photoReference);
-                    double pLat = r.geometry.location.lat;
-                    double pLng = r.geometry.location.lng;
-
-                    items.add(new ItemModel(pImage, pName, pCity, pCountry, pRating, pLat, pLng, 1));
-                }
-
-                // Update the singleton CurrentItems to contain our generated list of places
-                CurrentItems.getInstance().setCurrStackHotels(new ArrayList<>(items));
-                updateList(items);
-            }
-        } catch (Exception e) {
-            throw new IllegalStateException(e);
-        }
-    }
-
-    // Recieves a photo_reference of a place, sends an HTTP request to Places API, and converts the result to a Bitmap photo.
-    private Bitmap getPlacePhoto(String photoReference) throws IOException, ExecutionException, InterruptedException {
-        Bitmap placePhoto;
-
-        StringBuilder stringBuilder = new StringBuilder("https://maps.googleapis.com/maps/api/place/photo?");
-        stringBuilder.append("maxwidth=750");
-        stringBuilder.append("&maxheight=1125");
-        stringBuilder.append("&photo_reference=" + photoReference);
-        stringBuilder.append("&key=" + BuildConfig.MAPS_API_KEY);
-
-        String url = stringBuilder.toString();
-
-        FetchImage fetchImage = new FetchImage();
-        fetchImage.execute(url);
-
-        return fetchImage.get();
-
-        //testIV.setImageBitmap(fetchImage.get());
     }
 
 }

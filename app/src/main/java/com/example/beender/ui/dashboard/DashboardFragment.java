@@ -1,8 +1,13 @@
 package com.example.beender.ui.dashboard;
 
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.location.Location;
+import android.opengl.Visibility;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -19,6 +24,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
+import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.DiffUtil;
 
@@ -32,7 +38,9 @@ import com.example.beender.R;
 
 import com.example.beender.util.FetchData;
 import com.example.beender.util.FetchImage;
+import com.example.beender.util.SearchNearby;
 import com.google.android.gms.common.api.Status;
+import com.google.android.gms.location.CurrentLocationRequest;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 //import com.google.android.gms.maps.model.LatLng;
@@ -155,18 +163,40 @@ public class DashboardFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
 
+        //Get user's preferences (from 'SETTINGS' fragment)
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+
         btnFinish = view.findViewById(R.id.btnFinish);
         btnFinish.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(CurrentItems.getInstance().getSwipedRight().isEmpty()) {
+                if(CurrentItems.getInstance().getSwipedRight().get(CurrentItems.getInstance().getCurrDay()).size() < 2) {
                     Toast.makeText(getContext(), "Pick at least two places!", Toast.LENGTH_SHORT).show();
                 } else {
-                    Navigation.findNavController(view).navigate(R.id.action_navigation_dashboard_to_navigation_map);
+                    // If the trip type is "Star" and we are not at the final day of the trip - Go to the next day.
+                    if(sharedPreferences.getString("kind_of_trip", "").equals("Star") && (Integer.parseInt(sharedPreferences.getString("numOfDaysForTravel", "")) > (CurrentItems.getInstance().getCurrDay()+1))) {
+                        CurrentItems.getInstance().nextDay();
+                        Log.d(TAG, sharedPreferences.getString("numOfDaysForTravel", "") + " " + CurrentItems.getInstance().getCurrDay());
+
+                        // Update the text on the button to the day number.
+                        btnFinish.setText("End Day " + (CurrentItems.getInstance().getCurrDay()+1));
+                    }
+
+                    // If the trip type is "Journey" OR if we reached the final day, navigate to the map fragment and display the routes.
+                    else {
+                        Navigation.findNavController(view).navigate(R.id.action_navigation_dashboard_to_navigation_map);
+                    }
                 }
             }
 
         });
+        // Change button text from "Finish" to "End Day #" if the trip type is "Star"
+        if(sharedPreferences.getString("kind_of_trip", "").equals("Star")) {
+            btnFinish.setText("End Day " + (CurrentItems.getInstance().getCurrDay()+1));
+        }
+        if(CurrentItems.getInstance().getCurrStack().get(0).isEmpty()) {
+            btnFinish.setVisibility(View.GONE);
+        }
 
         btnStartTrip = view.findViewById(R.id.btnStartTrip);
         btnStartTrip.setOnClickListener(new View.OnClickListener() {
@@ -191,18 +221,44 @@ public class DashboardFragment extends Fragment {
             @Override
             public void onPlaceSelected(@NonNull Place place) {
 
-                Toast.makeText(getContext(), "Searching for cool places in  " + place.getName() +"...", Toast.LENGTH_SHORT).show();
-
-                Log.i(TAG, "Place: " + place.getName() + ", " + place.getId());
                 double lat = place.getLatLng().latitude;
                 double lng = place.getLatLng().longitude;
                 try {
-                    getNearbyPlaces(lat,lng);
+                    updateList(SearchNearby.getNearbyPlaces(lat,lng));
                 } catch (ExecutionException e) {
                     e.printStackTrace();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
+
+                //If the trip type is a star, we first asל the user to choose a hotel.
+                if(sharedPreferences.getString("kind_of_trip", "").equals("Star")) {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                    builder.setMessage("Let's start by finding a Hotel!")
+                            .setPositiveButton(R.string.alertOk, new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+
+                                    // Navigate to find hotel fragment
+                                    Bundle bundle = new Bundle();
+                                    bundle.putDoubleArray("latlng", new double[]{place.getLatLng().latitude, place.getLatLng().longitude});
+                                    bundle.putInt("markerIndex", 0);
+                                    bundle.putString("parentFrag", "dashboard");
+                                    Navigation.findNavController(view).navigate(R.id.action_navigation_dashboard_to_hotelSearchFragment, bundle);
+                                }
+                            })
+                            .setNegativeButton(R.string.alertCancel, new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                    // User cancelled the dialog
+                                    dialog.cancel();
+                                }
+                            });
+                    AlertDialog dialog = builder.create();
+                    dialog.show();
+                }
+
+                Toast.makeText(getContext(), "Searching for cool places in  " + place.getName() +"...", Toast.LENGTH_SHORT).show();
+
+                btnFinish.setVisibility(View.VISIBLE);
             }
 
 
@@ -228,22 +284,18 @@ public class DashboardFragment extends Fragment {
                 if (direction == Direction.Right){
 
                     ItemModel swipedItem = adapter.getItems().get(manager.getTopPosition() - 1);
+                    CurrentItems.getInstance().addToSwipedRight(swipedItem);
 
-                    if(!CurrentItems.getInstance().getSwipedRight().containsKey(0)) {
-                        CurrentItems.getInstance().getSwipedRight().put(0, new ArrayList<>());
-                    }
-                    CurrentItems.getInstance().getSwipedRight().get(0).add(swipedItem);
-
-                    if(swipedItem.getType() == 1) {
-                        CurrentItems.getInstance().setCurrStackHotels(new ArrayList<>());
-                        updateList(new ArrayList<>());
-                    }
+                    // Remove the swiped item from CurrStack
+                    CurrentItems.getInstance().getCurrStack().get(0).remove(swipedItem);
                 }
                 if (direction == Direction.Top){
                     //Toast.makeText(getContext(), "Direction Top "+currentCardAttractionID, Toast.LENGTH_SHORT).show();
                 }
                 if (direction == Direction.Left){
-                    //Toast.makeText(getContext(), "Direction Left "+currentCardAttractionID, Toast.LENGTH_SHORT).show();
+                    ItemModel swipedItem = adapter.getItems().get(manager.getTopPosition() - 1);
+                    // Remove the swiped item from CurrStack
+                    CurrentItems.getInstance().getCurrStack().get(0).remove(swipedItem);
                 }
                 if (direction == Direction.Bottom){
                     //Toast.makeText(getContext(), "Direction Bottom "+currentCardAttractionID, Toast.LENGTH_SHORT).show();
@@ -305,11 +357,15 @@ public class DashboardFragment extends Fragment {
 //    }
 //
     private List<ItemModel> addList() {
+        if(CurrentItems.getInstance().getCurrStack().containsKey(0)) {
+            return CurrentItems.getInstance().getCurrStack().get(0);
+        }
         List<ItemModel> items = new ArrayList<>();
         return items;
     }
 
     private void updateList(List<ItemModel> newList) {
+        if(newList == null) { return; }
         List<ItemModel> oldList = adapter.getItems();
         CardStackCallback callback = new CardStackCallback(oldList, newList);
         DiffUtil.DiffResult results = DiffUtil.calculateDiff(callback);
@@ -337,7 +393,8 @@ public class DashboardFragment extends Fragment {
                             lastKnownLocation = task.getResult();
                             if (lastKnownLocation != null) {
                                 try {
-                                    getNearbyPlaces(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude());
+                                    updateList(SearchNearby.getNearbyPlaces(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude()));
+                                    ;
                                 } catch (ExecutionException e) {
                                     e.printStackTrace();
                                 } catch (InterruptedException e) {
@@ -399,131 +456,5 @@ public class DashboardFragment extends Fragment {
         }
     }
     // [END maps_current_place_on_request_permissions_result]
-
-    /**
-     * Sends our current location through an HTTP request to Places API and receives a list of nearby places.
-     * @param lat lng
-     */
-    public void getNearbyPlaces(double lat, double lng) throws ExecutionException, InterruptedException {
-        StringBuilder stringBuilder = new StringBuilder("https://maps.googleapis.com/maps/api/place/nearbysearch/json?");
-        stringBuilder.append("location=" + lat + "," + lng);
-        stringBuilder.append("&radius=3500");
-        stringBuilder.append("&type=tourist_attraction");
-        stringBuilder.append("&key=" + BuildConfig.MAPS_API_KEY);
-
-        String url = stringBuilder.toString();
-        Object dataFetch[] = new Object[2];
-        dataFetch[0] = null;
-        dataFetch[1] = url;
-
-        FetchData fetchData = new FetchData();
-        fetchData.execute(dataFetch);
-
-        String taskResult = "";
-        String photoReference = "";
-        taskResult = fetchData.get();
-
-        if(fetchData.getStatus() != AsyncTask.Status.PENDING) {
-            try {
-                Log.d(TAG, "INSIDE IF");
-                JSONObject jobj = new JSONObject(taskResult);
-                JSONArray jarr = jobj.getJSONArray("results");
-                Log.d(TAG, "OBJ - " + jobj.toString());
-                Log.d(TAG, "ARR - " + jarr.toString());
-                Log.d(TAG, "ARR - " + jarr.get(0).toString());
-
-
-                // Create a list of ItemModel that contains all info of each Place we generated
-                List<ItemModel> items = new ArrayList<>();
-                for (int i=0; i < jarr.length(); i++) {
-                    Log.d(TAG, "Item NUMBER " + i + "- " + jarr.get(i).toString());
-                    if(((JSONObject) jarr.get(i)).has("photos")) {
-                        JSONObject temp = jarr.getJSONObject(i);
-                        String pName = temp.get("name").toString();
-                        String pCity = temp.get("vicinity").toString();
-                        String pCountry = temp.get("vicinity").toString();
-                        String pRating = "No Rating";
-                        if(temp.has("rating")) {
-                            pRating = temp.get("rating").toString();
-                        }
-                        Bitmap pImage = getPlacePhoto(((JSONObject) ((JSONArray) ((JSONObject) jarr.get(i)).get("photos")).get(0)).get("photo_reference").toString());
-                        double pLat = (Double) ((JSONObject) ((JSONObject) temp.get("geometry")).get("location")).get("lat");
-                        double pLng = (Double) ((JSONObject) ((JSONObject) temp.get("geometry")).get("location")).get("lng");
-
-                        items.add(new ItemModel(pImage, pName, pCity, pCountry, pRating, pLat, pLng, 0));
-                    }
-                }
-
-                // Update the singleton CurrentItems to contain our generated list of places
-                CurrentItems.getInstance().getCurrStack().put(0, new ArrayList<>(items));
-                updateList(items);
-
-            } catch (JSONException | IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    public void getNearbyHotels(LatLng location) throws ExecutionException, InterruptedException {
-        NearbySearchRequest request = PlacesApi.nearbySearchQuery(MainActivity.gaContext, location)
-                .radius(3500)
-                .rankby(RankBy.PROMINENCE)
-                .type(PlaceType.LODGING);
-        try {
-            PlacesSearchResponse response = request.await();
-            for(PlacesSearchResult r : response.results) {
-                Log.d(TAG, "Vicinity: " + r.vicinity + " Geometry: " + r.geometry.location);
-            }
-
-            // Create a list of ItemModel that contains all info of each Place we generated
-            List<ItemModel> items = new ArrayList<>();
-            for (PlacesSearchResult r : response.results) {
-                if(r.photos.length != 0) {
-                    String pName = r.name;
-                    String pCity = r.vicinity;
-                    String pCountry = r.vicinity;
-                    String pRating = "No Rating";
-                    if(r.userRatingsTotal != 0) {
-                        pRating = String.valueOf(r.rating);
-                    }
-                    Bitmap pImage = getPlacePhoto(r.photos[0].photoReference);
-                    double pLat = r.geometry.location.lat;
-                    double pLng = r.geometry.location.lng;
-
-                    items.add(new ItemModel(pImage, pName, pCity, pCountry, pRating, pLat, pLng, 1));
-                }
-
-                // Update the singleton CurrentItems to contain our generated list of places
-                CurrentItems.getInstance().setCurrStackHotels(new ArrayList<>(items));
-                updateList(items);
-            }
-        } catch (Exception e) {
-            throw new IllegalStateException(e);
-        }
-    }
-
-    // Recieves a photo_reference of a place, sends an HTTP request to Places API, and converts the result to a Bitmap photo.
-    private Bitmap getPlacePhoto(String photoReference) throws IOException, ExecutionException, InterruptedException {
-        Bitmap placePhoto;
-
-        StringBuilder stringBuilder = new StringBuilder("https://maps.googleapis.com/maps/api/place/photo?");
-        stringBuilder.append("maxwidth=750");
-        stringBuilder.append("&maxheight=1125");
-        stringBuilder.append("&photo_reference=" + photoReference);
-        stringBuilder.append("&key=" + BuildConfig.MAPS_API_KEY);
-
-        String url = stringBuilder.toString();
-
-        FetchImage fetchImage = new FetchImage();
-        fetchImage.execute(url);
-
-        return fetchImage.get();
-
-        //testIV.setImageBitmap(fetchImage.get());
-    }
-
-
-
-
 }
 

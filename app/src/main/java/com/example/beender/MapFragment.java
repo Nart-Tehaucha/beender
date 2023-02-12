@@ -2,6 +2,9 @@ package com.example.beender;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.os.Build;
@@ -11,6 +14,7 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.navigation.Navigation;
+import androidx.preference.PreferenceManager;
 
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -41,6 +45,7 @@ import com.google.maps.model.TravelMode;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.ExecutionException;
 
 
@@ -71,7 +76,7 @@ public class MapFragment extends Fragment {
             public void onMapReady(GoogleMap googleMap) {
                 mMap = googleMap;
                 if(!CurrentItems.getInstance().getSwipedRight().isEmpty()) {
-                    getDirections(view);
+                    prepareMap(view);
                 }
             }
         });
@@ -79,10 +84,22 @@ public class MapFragment extends Fragment {
         return view;
     }
 
-    private void getDirections(View view) {
+    private void prepareMap(View view) {
+        Log.d(TAG, "================= BEFORE =================");
+        for(int i=0;i<CurrentItems.getInstance().getCurrDay()+1;i++) {
+            Log.d(TAG, "DAY " + i + " " + CurrentItems.getInstance().getSwipedRight().get(i).toString());
+        }
+        Log.d(TAG, "================= ====== =================");
+
+        for(int i = 0 ; i <= CurrentItems.getInstance().getCurrDay(); i++) {
+            getDirections(view, i);
+        }
+    }
+
+    private void getDirections(View view, int day) {
         polylineOptions = new PolylineOptions();
 
-        swipedRight = CurrentItems.getInstance().getAsLatLng(0);
+        swipedRight = CurrentItems.getInstance().getAsLatLng(day);
 
         com.google.maps.model.LatLng origin = swipedRight.get(0);
         com.google.maps.model.LatLng destination = swipedRight.get(swipedRight.size()-1);
@@ -96,15 +113,21 @@ public class MapFragment extends Fragment {
 
         // Create ArrayList containing all markers to add to the map. Origin and destination markers are colored different from the waypoint markers.
         markers = new ArrayList<>();
+
+        Bitmap hotelIcon = BitmapFactory.decodeResource(getResources(), R.drawable.hotel);
+
         markers.add(new MarkerOptions()
                 .position(new LatLng(swipedRight.get(0).lat, swipedRight.get(0).lng))
-                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
+                .icon(BitmapDescriptorFactory.fromBitmap(Bitmap.createScaledBitmap(hotelIcon, 120, 133, false)))
+                .zIndex(1.0f));
         for(com.google.maps.model.LatLng l : mWaypoints) {
             markers.add(new MarkerOptions().position(new LatLng(l.lat, l.lng)));
         }
         markers.add(new MarkerOptions()
                 .position(new LatLng(swipedRight.get(swipedRight.size()-1).lat, swipedRight.get(swipedRight.size()-1).lng))
                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ROSE)));
+
+        //Log.d(TAG, "DAY " + day + " " + "markers size  " + markers.size());
 
         // Create a request for calculating and returning the final route
         DirectionsApiRequest request =
@@ -129,11 +152,18 @@ public class MapFragment extends Fragment {
         // Draw the route
         polylineOptions.addAll(convertCoordType(latlongList));
         polylineOptions.width(10);
-        polylineOptions.color(Color.BLUE);
+        Random rnd = new Random();
+        int color = Color.argb(255, rnd.nextInt(256), rnd.nextInt(256), rnd.nextInt(256));
+        polylineOptions.color(color);
         mMap.addPolyline(polylineOptions);
 
         // Add all the markers to the map
         for(int i = 0; i<markers.size(); i++) {
+            // Don't duplicate the hotel's makrer - for Star routes only
+            if(day > 0) {
+                //Log.d(TAG, "SKIPPED MARKER: " + markers.get(i).getPosition().toString());
+                //if(i == 0) continue;
+            }
             mMap.addMarker(markers.get(i)).setTag(i);
         }
 
@@ -152,15 +182,28 @@ public class MapFragment extends Fragment {
                                 int markerIndex = (Integer) marker.getTag();
                                 switch(which) {
                                     case 0:
-                                        CurrentItems.getInstance().getSwipedRight().get(0).remove(markerIndex);
+                                        //Get user's preferences (from 'SETTINGS' fragment)
+                                        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+                                        if(sharedPreferences.getString("kind_of_trip", "").equals("Star") && markerIndex == 0) {
+                                            Toast.makeText(getContext(), "You can't remove the starting hotel!", Toast.LENGTH_SHORT).show();
+                                            break;
+                                        }
+
+                                        CurrentItems.getInstance().getSwipedRight().get(day).remove(markerIndex);
+                                        Log.d(TAG, "================= AFTER =================");
+                                        for(int i=0;i<CurrentItems.getInstance().getCurrDay()+1;i++) {
+                                            Log.d(TAG, "DAY " + i + " " + CurrentItems.getInstance().getSwipedRight().get(i).toString());
+                                        }
+                                        Log.d(TAG, "================= ===== =================");
                                         mMap.clear();
-                                        getDirections(view);
+                                        prepareMap(view);
                                         break;
                                     case 1:
-                                        com.google.maps.model.LatLng hotelLatLng = new com.google.maps.model.LatLng(CurrentItems.getInstance().getSwipedRight().get(0).get(markerIndex).getLat(), CurrentItems.getInstance().getSwipedRight().get(0).get(markerIndex).getLng());
+                                        com.google.maps.model.LatLng hotelLatLng = new com.google.maps.model.LatLng(CurrentItems.getInstance().getSwipedRight().get(day).get(markerIndex).getLat(), CurrentItems.getInstance().getSwipedRight().get(day).get(markerIndex).getLng());
                                         Bundle bundle = new Bundle();
                                         bundle.putDoubleArray("latlng", new double[]{hotelLatLng.lat, hotelLatLng.lng});
                                         bundle.putInt("markerIndex", markerIndex);
+                                        bundle.putString("parentFrag", "map");
                                         Navigation.findNavController(view).navigate(R.id.action_navigation_map_to_hotelSearchFragment, bundle);
                                         break;
                                 }

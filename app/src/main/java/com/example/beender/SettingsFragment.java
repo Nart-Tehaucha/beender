@@ -67,10 +67,13 @@
 package com.example.beender;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Toast;
 
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
+
+import com.example.beender.ui.dashboard.DashboardFragment;
 
 public class SettingsFragment extends PreferenceFragmentCompat {
     @Override
@@ -82,6 +85,7 @@ public class SettingsFragment extends PreferenceFragmentCompat {
             @Override
             public boolean onPreferenceChange(Preference preference, Object newValue) {
                 Toast.makeText(getContext(), newValue.toString(), Toast.LENGTH_SHORT).show();
+                Log.d(DashboardFragment.class.getSimpleName(), newValue.toString());
                 return true;
             }
         });
@@ -113,35 +117,8 @@ public class SettingsFragment extends PreferenceFragmentCompat {
             }
         });
 
-        Preference hoursOfTravel = (Preference) findPreference("hoursOfTravel");
-        hoursOfTravel.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
-            @Override
-            public boolean onPreferenceChange(Preference preference, Object newValue) {
-                Toast.makeText(getContext(), newValue.toString(), Toast.LENGTH_SHORT).show();
-                return true;
-            }
-        });
-
-        Preference adaptedForChildren = (Preference) findPreference("adaptedForChildren");
-        adaptedForChildren.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
-            @Override
-            public boolean onPreferenceChange(Preference preference, Object newValue) {
-                Toast.makeText(getContext(), newValue.toString(), Toast.LENGTH_SHORT).show();
-                return true;
-            }
-        });
-
-        Preference adaptedForElders = (Preference) findPreference("adaptedForElders");
-        adaptedForElders.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
-            @Override
-            public boolean onPreferenceChange(Preference preference, Object newValue) {
-                Toast.makeText(getContext(), newValue.toString(), Toast.LENGTH_SHORT).show();
-                return true;
-            }
-        });
-
-        Preference adapteForAWheelchair = (Preference) findPreference("adapteForAWheelchair");
-        adapteForAWheelchair.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+        Preference adaptedForAWheelchair = (Preference) findPreference("adaptedForAWheelchair");
+        adaptedForAWheelchair.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
             @Override
             public boolean onPreferenceChange(Preference preference, Object newValue) {
                 Toast.makeText(getContext(), newValue.toString(), Toast.LENGTH_SHORT).show();
@@ -150,14 +127,6 @@ public class SettingsFragment extends PreferenceFragmentCompat {
         });
         Preference ratingStar = (Preference) findPreference("ratingStar");
         ratingStar.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
-            @Override
-            public boolean onPreferenceChange(Preference preference, Object newValue) {
-                Toast.makeText(getContext(), newValue.toString(), Toast.LENGTH_SHORT).show();
-                return true;
-            }
-        });
-        Preference TypeOfPlaces = (Preference) findPreference("TypeOfPlaces");
-        TypeOfPlaces.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
             @Override
             public boolean onPreferenceChange(Preference preference, Object newValue) {
                 Toast.makeText(getContext(), newValue.toString(), Toast.LENGTH_SHORT).show();

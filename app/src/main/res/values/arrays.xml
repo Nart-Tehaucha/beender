@@ -46,8 +46,8 @@
     </string-array>
 
     <string-array name="kind_of_trip_values">
-        <item>Journey (few hotels)</item>
-        <item>Round (one hotel only)</item>
+        <item>Journey</item>
+        <item>Star</item>
     </string-array>
 
     <string-array name="type_of_places_values">
@@ -55,8 +55,6 @@
         <item>Attraction</item>
         <item>Park</item>
         <item>Nature</item>
-        <item>Hiking</item>
-        <item>Beach</item>
     </string-array>
 
     <string-array name="empty_array"/>

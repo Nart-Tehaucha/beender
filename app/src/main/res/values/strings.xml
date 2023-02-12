@@ -47,5 +47,7 @@
     <string name="markerOk">Remove</string>
     <string name="markerCancel">Cancel</string>
     <string name="markerDialogMessage">Are you sure you want to remove this destination?</string>
+    <string name="alertOk">Ok</string>
+    <string name="alertCancel">Cancel</string>
 
 </resources>

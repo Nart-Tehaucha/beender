@@ -13,8 +13,10 @@ public class CurrentItems {
     private static CurrentItems single_instance = null;
 
     private HashMap<Integer, ArrayList<ItemModel>> currStack;
-    private ArrayList<ItemModel> currStackHotels;
     private HashMap<Integer, ArrayList<ItemModel>> swipedRight;
+    private ItemModel chosenHotel;
+    private ArrayList<ItemModel> currStackHotels;
+    private int currDay;
 
     // Constructor
     // Here we will be creating private constructor
@@ -22,8 +24,12 @@ public class CurrentItems {
     private CurrentItems()
     {
         currStack = new HashMap<>();
-        currStackHotels = new ArrayList<>();
         swipedRight = new HashMap<>();
+        currStackHotels = new ArrayList<>();
+        currDay = 0;
+
+        currStack.put(0, new ArrayList<>());
+        swipedRight.put(0, new ArrayList<>());
     }
 
     // Static method
@@ -65,6 +71,18 @@ public class CurrentItems {
         this.currStackHotels = currStackHotels;
     }
 
+    public ItemModel getChosenHotel() {
+        return chosenHotel;
+    }
+
+    public void setChosenHotel(ItemModel chosenHotel) {
+        this.chosenHotel = chosenHotel;
+    }
+
+    public int getCurrDay() {
+        return currDay;
+    }
+
     public List<LatLng> getAsLatLng (int day) {
         if(swipedRight != null) {
             List<LatLng> list = new ArrayList<>();
@@ -74,5 +92,19 @@ public class CurrentItems {
             return list;
         }
         return null;
+    }
+
+    public void addToSwipedRight(ItemModel item) {
+        if(swipedRight == null) return;
+        swipedRight.get(currDay).add(item);
+    }
+
+    public void nextDay() {
+        if(swipedRight == null) return;
+        currDay += 1;
+        swipedRight.put(currDay, new ArrayList<>());
+
+        // Set the chosen hotel as the starting point of this day's route
+        swipedRight.get(currDay).add(chosenHotel);
     }
 }

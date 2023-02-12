@@ -8,7 +8,7 @@
 <!--            app:useSimpleSummaryProvider="true" />-->
 
         <ListPreference
-            app:defaultValue="Journey (few hotels)"
+            app:defaultValue="Journey"
             app:entries="@array/kind_of_trip_values"
             app:entryValues="@array/kind_of_trip_values"
             app:key="kind_of_trip"
@@ -27,42 +27,27 @@
             android:key="kmRadius"
             app:title="Radius from searched location (KM)"
             app:showSeekBarValue="true"
-            app:min="50"
-            android:max="100000"
+            app:min="2500"
+            android:max="15000"
             android:defaultValue="150" />
 
         <EditTextPreference
             app:key="numOfDaysForTravel"
             app:title="Number Of Days For Traveling"
             android:inputType="number"
-            app:defaultValue="5"
+            app:defaultValue="1"
             app:useSimpleSummaryProvider="true" />
-
-        <MultiSelectListPreference
-            android:key="hoursOfTravel"
-            app:title="Hours Of Travel"
-            android:entries="@array/hoursOfTravel_values"
-            android:entryValues="@array/hoursOfTravel_values"
-            android:defaultValue="@array/hoursOfTravel_values"/>
 
     </PreferenceCategory>
 
-    <PreferenceCategory app:title="CARDS SETTINGS">
-
+    <PreferenceCategory app:title="ACCESSIBILITY">
         <SwitchPreferenceCompat
-            android:key="adaptedForChildren"
-            app:title="Adapted For children"
-            android:defaultValue="false" />
-
-        <SwitchPreferenceCompat
-            android:key="adaptedForElders"
-            app:title="Adapted For elders"
-            android:defaultValue="false" />
-
-        <SwitchPreferenceCompat
-            android:key="adapteForAWheelchair"
+            android:key="adaptedForAWheelchair"
             app:title="Adapted For a Wheelchair"
             android:defaultValue="false" />
+    </PreferenceCategory>
+
+    <PreferenceCategory app:title="CARDS SETTINGS">
 
         <ListPreference
             app:defaultValue="Any"
@@ -71,13 +56,6 @@
             app:key="ratingStar"
             app:title="Rating"
             app:useSimpleSummaryProvider="true" />
-
-        <MultiSelectListPreference
-            android:key="TypeOfPlaces"
-            app:title="Type of Places"
-            android:entries="@array/type_of_places_values"
-            android:entryValues="@array/type_of_places_values"
-            android:defaultValue="@array/empty_array"/>
 
         <MultiSelectListPreference
             android:key="priceLevel"
