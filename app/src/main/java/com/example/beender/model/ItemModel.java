@@ -13,16 +13,17 @@ import com.google.gson.JsonObject;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 public class ItemModel implements Serializable {
     private String placeId;
-    private Bitmap image;
+    private transient Bitmap image;
     private String name, city, country, rating;
     private double lat,lng;
     private int type; // 0 - Destination, 1 - Hotel
 
-    private ItemAdditionalData additionalData;
+    private transient ItemAdditionalData additionalData;
 
     public ItemModel() {
     }
@@ -59,30 +60,86 @@ public class ItemModel implements Serializable {
         FetchData fetchData = new FetchData();
         fetchData.execute(dataFetch);
 
+        String taskResult = null;
         try {
-            String taskResult = fetchData.get();
-
-            JsonObject locationDetails = new Gson().fromJson(taskResult, JsonObject.class);
-
-            ArrayList<Review> reviews = getReviewsList(locationDetails);
-
-            ArrayList<Bitmap> images = new ArrayList<>();
-            for (JsonElement imageJson : locationDetails.get("result").getAsJsonObject().get("photos").getAsJsonArray()) {
-                String imageRef = imageJson.getAsJsonObject().get("photo_reference").getAsString();
-                images.add(SearchNearby.getPlacePhoto(imageRef));
-            }
-
-            additionalData = new ItemAdditionalData(images, reviews);
-
-            return additionalData;
-        } catch (ExecutionException | InterruptedException | IOException e) {
-            e.printStackTrace();
+            taskResult = fetchData.get();
+        } catch (ExecutionException | InterruptedException e) {
+            throw new RuntimeException(e);
         }
 
-        return null;
+        JsonObject locationDetails = new Gson().fromJson(taskResult, JsonObject.class);
+
+        ArrayList<Review> reviews = null;
+        try {
+            reviews = buildReviewsList(locationDetails);
+        } catch (ExecutionException | InterruptedException e) {
+            e.printStackTrace();
+            reviews = new ArrayList<>(); // Return empty reviews
+        }
+
+        ArrayList<Bitmap> images = null;
+        try {
+            images = buildImagesList(locationDetails);
+        } catch (IOException | ExecutionException | InterruptedException e) {
+            e.printStackTrace();
+            images = new ArrayList<>(); // Return empty images
+        }
+
+        String description = null;
+        try {
+            description = fetchDescription();
+        } catch (ExecutionException | InterruptedException e) {
+            e.printStackTrace();
+            description = "No description found";
+        }
+
+        additionalData = new ItemAdditionalData(images, reviews, description);
+
+        return additionalData;
     }
 
-    private ArrayList<Review> getReviewsList(JsonObject locationDetails) throws ExecutionException, InterruptedException {
+    private String fetchDescription() throws ExecutionException, InterruptedException {
+        String wikiUrl = "https://en.wikipedia.org/w/api.php?action=query&format=json&prop=extracts&exintro&explaintext&redirects=1&titles=" + name;
+        FetchData fetchData = new FetchData();
+
+        Object[] dataFetch = new Object[2];
+        dataFetch[0] = null;
+        dataFetch[1] = wikiUrl;
+
+        fetchData.execute(dataFetch);
+
+        String resultStr = fetchData.get();
+
+        JsonObject resultJson = new Gson().fromJson(resultStr, JsonObject.class);
+        JsonObject pagesJson = resultJson.get("query").getAsJsonObject().get("pages").getAsJsonObject();
+        for (Map.Entry<String, JsonElement> pageEntry : pagesJson.entrySet()) {
+            if (pageEntry.getKey().equals("-1")) {
+                return "No description found";
+            }
+            JsonObject page = pageEntry.getValue().getAsJsonObject();
+            if (!page.has("extract")) {
+                continue;
+            }
+
+            String fullDescription = page.get("extract").getAsString();
+
+            return fullDescription;
+        }
+
+        return resultStr;
+    }
+
+    private ArrayList<Bitmap> buildImagesList(JsonObject locationDetails) throws IOException, ExecutionException, InterruptedException {
+        ArrayList<Bitmap> images = new ArrayList<>();
+        for (JsonElement imageJson : locationDetails.get("result").getAsJsonObject().get("photos").getAsJsonArray()) {
+            String imageRef = imageJson.getAsJsonObject().get("photo_reference").getAsString();
+            images.add(SearchNearby.getPlacePhoto(imageRef));
+        }
+
+        return images;
+    }
+
+    private ArrayList<Review> buildReviewsList(JsonObject locationDetails) throws ExecutionException, InterruptedException {
         ArrayList<Review> reviews = new ArrayList<>();
         for (JsonElement reviewJson : locationDetails.get("result").getAsJsonObject().get("reviews").getAsJsonArray()) {
             JsonObject reviewJsonObject = reviewJson.getAsJsonObject();
@@ -102,6 +159,8 @@ public class ItemModel implements Serializable {
 
         return reviews;
     }
+
+
 
     public Bitmap getImage() {
         return image;

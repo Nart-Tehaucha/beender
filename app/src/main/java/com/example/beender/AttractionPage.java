@@ -1,10 +1,13 @@
 package com.example.beender;
 
+import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Insets;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.Typeface;
+import android.net.Uri;
 import android.os.Bundle;
 
 import android.text.Html;
@@ -34,6 +37,8 @@ import androidx.fragment.app.Fragment;
 import com.example.beender.model.ItemAdditionalData;
 import com.example.beender.model.ItemModel;
 import com.example.beender.model.Review;
+
+import org.w3c.dom.Text;
 
 import java.util.List;
 
@@ -188,20 +193,89 @@ public class AttractionPage extends Fragment {
         }
     }
 
+    private void setAllImagesByCurrentPosition(View parent, List<Bitmap> images, int currentPosition) {
+        ImageView mainImage = (ImageView)parent.findViewById(R.id.main_image);
+        mainImage.setImageBitmap(images.get(currentPosition));
+
+        //TODO: This duplicate code is ugly, better to create an array for all the thumbails and do this in a loop. But I'm feeling pretty lazy now.
+        final int nextPosition1 = (currentPosition + 1) % images.size();
+        ImageView thumbnail1 = (ImageView)parent.findViewById(R.id.thumbnail_1);
+        thumbnail1.setImageBitmap(images.get(nextPosition1));
+        thumbnail1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                setAllImagesByCurrentPosition(parent, images, nextPosition1);
+            }
+        });
+
+        final int nextPosition2 = (currentPosition + 2) % images.size();
+        ImageView thumbnail2 = (ImageView)parent.findViewById(R.id.thumbnail_2);
+        thumbnail2.setImageBitmap(images.get(nextPosition2));
+        thumbnail2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                setAllImagesByCurrentPosition(parent, images, nextPosition2);
+            }
+        });
+
+        final int nextPosition3 = (currentPosition + 3) % images.size();
+        ImageView thumbnail3 = (ImageView)parent.findViewById(R.id.thumbnail_3);
+        thumbnail3.setImageBitmap(images.get(nextPosition3));
+        thumbnail3.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                setAllImagesByCurrentPosition(parent, images, nextPosition3);
+            }
+        });
+
+    }
+
     private void initializeViews(View parent) {
         TextView attractionTitle = (TextView)parent.findViewById(R.id.attraction_title);
         attractionTitle.setText(attractionArg.getName());
-        ImageView attractionImage = (ImageView)parent.findViewById(R.id.attraction_image);
+        ImageView attractionImage = (ImageView)parent.findViewById(R.id.main_image);
 
-        if (attractionArg.fetchAdditionalData().getImages().size() == 0) {
+        List<Bitmap> images = attractionArg.fetchAdditionalData().getImages();
+
+        if (images.size() == 0) {
             attractionImage.setImageBitmap(attractionArg.getImage());
         } else {
-            attractionImage.setImageBitmap(attractionArg.fetchAdditionalData().getImages().get(3));
+            setAllImagesByCurrentPosition(parent, images, 0);
         }
 
 
         setUpStars(parent);
         setUpReviews(parent);
+
+        TextView attractionDescription = (TextView)parent.findViewById(R.id.attraction_description);
+        TextView readMore = (TextView)parent.findViewById(R.id.read_more);
+
+        String fullDescription = attractionArg.fetchAdditionalData().getDescription();
+        int index = fullDescription.indexOf("\n"); // Find the index of the first double line break
+        String description;
+        if (index >= 0) {
+            description = fullDescription.substring(0, index); // Get the text before the first line break
+
+            readMore.setVisibility(View.VISIBLE);
+            readMore.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    // uncomment this to redirect to wikipedia on click
+//                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://en.wikipedia.org/wiki/" + attractionArg.getName()));
+//                    startActivity(intent);
+
+                    attractionDescription.setText(attractionArg.fetchAdditionalData().getDescription());
+
+                }
+            });
+        } else {
+            readMore.setVisibility(View.INVISIBLE);
+            description = fullDescription; // There are no double line breaks, so use the entire text as the first paragraph
+        }
+
+        attractionDescription.setText(description);
+
+
 
 
     }

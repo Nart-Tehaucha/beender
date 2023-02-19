@@ -10,17 +10,11 @@
     android:gravity="center_horizontal"
     >
 
-    <ImageView
-        android:id="@+id/attraction_image"
-        android:layout_width="match_parent"
-        android:layout_height="250dp"
-        android:scaleType="centerCrop"
-        android:src="@drawable/sample1"/>
+
 
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/attraction_image"
         >
 
 
@@ -31,6 +25,63 @@
             android:id="@+id/reviews_layout"
             android:gravity="center_horizontal"
             >
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/images_layout"
+                >
+
+                <!-- ImageView for the main image -->
+                <ImageView
+                    android:id="@+id/main_image"
+                    android:layout_width="match_parent"
+                    android:layout_height="250dp"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/sample1" />
+
+                <!-- LinearLayout with the thumbnail images -->
+                <LinearLayout
+                    android:id="@+id/thumbnail_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="80dp"
+                    android:orientation="horizontal"
+                    android:layout_below="@id/main_image"
+                    android:padding="8dp">
+
+                    <!-- Thumbnail images -->
+                    <ImageView
+                        android:id="@+id/thumbnail_1"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:scaleType="centerCrop"
+                        android:paddingHorizontal="4dp"
+                        android:src="@drawable/sample2" />
+
+                    <ImageView
+                        android:id="@+id/thumbnail_2"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:scaleType="centerCrop"
+                        android:paddingHorizontal="4dp"
+                        android:src="@drawable/sample3" />
+
+                    <ImageView
+                        android:id="@+id/thumbnail_3"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:scaleType="centerCrop"
+                        android:paddingHorizontal="4dp"
+                        android:src="@drawable/sample4" />
+
+                </LinearLayout>
+
+                <!-- The rest of the layout goes here -->
+
+            </RelativeLayout>
 
             <TextView
                 android:id="@+id/attraction_title"
@@ -62,11 +113,22 @@
                 android:id="@+id/attraction_description"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:padding="10dp"
+                android:paddingTop="10dp"
+                android:paddingHorizontal="10dp"
                 android:textSize="14sp"
                 android:text="This is a very cool place with lots of cool stuff or something.
 This is a place holder description, all of this will eventually come from Wikipedia or something,
 I just need some text here to see how it will look"
+                />
+            <TextView
+                android:id="@+id/read_more"
+                android:visibility="visible"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="14sp"
+                android:paddingHorizontal="10dp"
+                android:textStyle="bold"
+                android:text="Read more..."
                 />
 
             <TextView

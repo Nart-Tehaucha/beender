@@ -4,7 +4,7 @@ import android.graphics.Bitmap;
 
 import java.io.Serializable;
 
-public class Review implements Serializable {
+public class Review {
     private final int rating;
     private final String authorName;
     private final String text;
