@@ -367,8 +367,13 @@ public class DashboardFragment extends Fragment {
             });
             @Override
             public boolean onInterceptTouchEvent(@NonNull RecyclerView rv, @NonNull MotionEvent e) {
-                if (mGestureDetector.onTouchEvent(e)) {
-                    Navigation.findNavController(root).navigate(R.id.action_navigation_dashboard_to_attractionPageFragment);
+                if (mGestureDetector.onTouchEvent(e) && adapter != null && adapter.getItemCount() > 0) {
+                    ItemModel swipedItem = adapter.getItems().get(manager.getTopPosition());
+
+                    Bundle bundle = new Bundle();
+                    bundle.putSerializable("attraction", swipedItem);
+
+                    Navigation.findNavController(root).navigate(R.id.action_navigation_dashboard_to_attractionPageFragment, bundle);
                 }
                 return false;
             }

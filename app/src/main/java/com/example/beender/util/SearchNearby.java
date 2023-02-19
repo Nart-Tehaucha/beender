@@ -73,6 +73,7 @@ public class SearchNearby {
                         String pCity = temp.get("vicinity").toString();
                         String pCountry = temp.get("vicinity").toString();
                         String pRating = "No Rating";
+                        String pId = temp.get("place_id").toString();
                         if(temp.has("rating")) {
                             pRating = temp.get("rating").toString();
                         }
@@ -80,7 +81,10 @@ public class SearchNearby {
                         double pLat = (Double) ((JSONObject) ((JSONObject) temp.get("geometry")).get("location")).get("lat");
                         double pLng = (Double) ((JSONObject) ((JSONObject) temp.get("geometry")).get("location")).get("lng");
 
-                        items.add(new ItemModel(pImage, pName, pCity, pCountry, pRating, pLat, pLng, 0));
+                        ItemModel attraction = new ItemModel(pId, pImage, pName, pCity, pCountry, pRating, pLat, pLng, 0);
+//                        attraction.fetchAdditionalData();
+
+                        items.add(attraction);
                     }
                 }
 
@@ -124,7 +128,7 @@ public class SearchNearby {
                     double pLat = r.geometry.location.lat;
                     double pLng = r.geometry.location.lng;
 
-                    items.add(new ItemModel(pImage, pName, pCity, pCountry, pRating, pLat, pLng, 1));
+                    items.add(new ItemModel("todo: get actual ID", pImage, pName, pCity, pCountry, pRating, pLat, pLng, 1));
                 }
 
                 // Update the singleton CurrentItems to contain our generated list of places
@@ -139,7 +143,7 @@ public class SearchNearby {
     }
 
     // Recieves a photo_reference of a place, sends an HTTP request to Places API, and converts the result to a Bitmap photo.
-    private static Bitmap getPlacePhoto(String photoReference) throws IOException, ExecutionException, InterruptedException {
+    public static Bitmap getPlacePhoto(String photoReference) throws IOException, ExecutionException, InterruptedException {
         Bitmap placePhoto;
 
         StringBuilder stringBuilder = new StringBuilder("https://maps.googleapis.com/maps/api/place/photo?");

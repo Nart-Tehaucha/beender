@@ -32,6 +32,7 @@ public class FetchData extends AsyncTask<Object,String,String> {
 
     @Override
     protected void onPostExecute(String s) {
+        Log.d("FetchData", s);
 //        List<HashMap<String, String>> listNearbyPlaces = null;
 //        DataParser dataParser = new DataParser();
 //        listNearbyPlaces = dataParser.parse(s);

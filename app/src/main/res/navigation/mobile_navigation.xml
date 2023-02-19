@@ -60,6 +60,11 @@
     <fragment
         android:id="@+id/attractionPageFragment"
         android:name="com.example.beender.AttractionPage"
-        tools:layout="@layout/fragment_attraction_page" />
+        tools:layout="@layout/fragment_attraction_page">
+        <argument
+            android:name="attraction"
+            app:argType="com.example.beender.model.ItemModel" />
+
+    </fragment>
 
 </navigation>
