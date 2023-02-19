@@ -17,6 +17,7 @@ import androidx.preference.Preference;
 import androidx.preference.PreferenceManager;
 
 import com.example.beender.ui.dashboard.DashboardFragment;
+import com.example.beender.util.Settings;
 import com.google.android.gms.common.api.Status;
 import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
@@ -36,6 +37,7 @@ public class MainActivity extends AppCompatActivity {
 
     //Get user's preferences (from 'SETTINGS' fragment)
     SharedPreferences sharedPreferences;
+    private Settings settings;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,24 +49,20 @@ public class MainActivity extends AppCompatActivity {
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         NavigationUI.setupWithNavController(navView, navController);
 
-        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        //Get user's preferences (from 'SETTINGS' fragment)
+        this.settings = new Settings(this);
 
-        // enter the key from your xml and the default value
-        String kind_of_trip = sharedPreferences.getString("kind_of_trip","");
-        String numOfPlacesPerDay = sharedPreferences.getString("numOfPlacesPerDay","");
-        Integer kmRadius = sharedPreferences.getInt("kmRadius", 1 );
-        String numOfDaysForTravel = sharedPreferences.getString("numOfDaysForTravel","");
-        Boolean adaptedForAWheelchair = sharedPreferences.getBoolean("adaptedForAWheelchair",false);
-        String ratingStar = sharedPreferences.getString("ratingStar","");
-        Set<String>  priceLevel = sharedPreferences.getStringSet("priceLevel",new HashSet<>());
-
-        Log.i("kind_of_trip: " +kind_of_trip, "INFO");
-        Log.i("numOfPlacesPerDay: " + numOfPlacesPerDay, "INFO");
-        Log.i("kmRadius: " + kmRadius.toString(), "INFO");
-        Log.i("numOfDaysForTravel: " +numOfDaysForTravel, "INFO");
-        Log.i("adaptedForAWheelchair: " + adaptedForAWheelchair, "INFO");
-        Log.i("ratingStar: " + ratingStar, "INFO");
-        Log.i("priceLevel: " + priceLevel, "INFO");
+        Log.i("kind_of_trip: " +settings.getKindOfTrip(), "INFO");
+        Log.i("numOfPlacesPerDay: " + settings.getNumOfPlacesPerDay(), "INFO");
+        Log.i("kmRadius: " + settings.getKmRadius().toString(), "INFO");
+        Log.i("numOfDaysForTravel: " +settings.getNumOfDaysForTravel(), "INFO");
+        Log.i("hoursOfTravel: " + settings.getHoursOfTravel(), "INFO");
+        Log.i("adaptedForChildren: " +settings.getAdaptedForChildren(), "INFO");
+        Log.i("adaptedForElders: " + settings.getAdaptedForElders(), "INFO");
+        Log.i("adapteForAWheelchair: " + settings.getAdaptedForAWheelchair(), "INFO");
+        Log.i("ratingStar: " + settings.getRatingStar(), "INFO");
+        Log.i("TypeOfPlaces: " + settings.getTypeOfPlaces(), "INFO");
+        Log.i("priceLevel: " + settings.getPriceLevel(), "INFO");
     }
 
 
