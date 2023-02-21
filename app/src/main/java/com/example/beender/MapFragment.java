@@ -20,9 +20,13 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.example.beender.model.CurrentItems;
+import com.example.beender.model.ItemModel;
 import com.example.beender.ui.dashboard.DashboardFragment;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -34,6 +38,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.maps.DirectionsApi;
 import com.google.maps.DirectionsApiRequest;
@@ -42,17 +47,20 @@ import com.google.maps.model.DirectionsResult;
 import com.google.maps.model.DirectionsRoute;
 import com.google.maps.model.TravelMode;
 
+import java.lang.reflect.Array;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
 
 
-public class MapFragment extends Fragment {
+public class MapFragment extends Fragment implements AdapterView.OnItemSelectedListener {
 
     private static final String TAG = DashboardFragment.class.getSimpleName();
     private GoogleMap mMap;
+    private Spinner spinner;
 
     List<com.google.maps.model.LatLng> swipedRight;
     List<com.google.maps.model.LatLng> mWaypoints;
@@ -60,9 +68,16 @@ public class MapFragment extends Fragment {
     ArrayList<MarkerOptions> markers;
     List<com.google.maps.model.LatLng> latlongList;
 
+    HashMap<Integer, ArrayList<Marker>> currentMarkers;
+    HashMap<Integer, ArrayList<Polyline>> currentPolylines;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
+        currentMarkers = new HashMap<>();
+        currentPolylines = new HashMap<>();
+
         // Initialize view
         View view=inflater.inflate(R.layout.fragment_map, container, false);
 
@@ -75,16 +90,48 @@ public class MapFragment extends Fragment {
             @Override
             public void onMapReady(GoogleMap googleMap) {
                 mMap = googleMap;
-                if(!CurrentItems.getInstance().getSwipedRight().isEmpty()) {
+                if(!CurrentItems.getInstance().getSwipedRight().get(0).isEmpty()) {
                     prepareMap(view);
                 }
             }
         });
+
+        spinner = (Spinner) view.findViewById(R.id.daysSpinner);
+
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        if(sharedPreferences.getString("kind_of_trip", "").equals("Star")) {
+            ArrayList<String> spinnerDays = new ArrayList<>();
+            spinnerDays.add("Show All");
+            if(CurrentItems.getInstance().getCurrDay() > 0) {
+                for(int i = 0 ; i <= CurrentItems.getInstance().getCurrDay(); i++) {
+                    spinnerDays.add("Day " + (i+1));
+                }
+            }
+
+            // Create an ArrayAdapter using the string array and a default spinner layout
+            ArrayAdapter adapter = new ArrayAdapter(getContext(), android.R.layout.simple_spinner_item, spinnerDays);
+            // Specify the layout to use when the list of choices appears
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            // Apply the adapter to the spinner
+            spinner.setAdapter(adapter);
+            spinner.setOnItemSelectedListener(this);
+
+        } else {
+            spinner.setVisibility(View.GONE);
+        }
+
+
         // Return view
         return view;
     }
 
+
+
     private void prepareMap(View view) {
+        if(spinner.getVisibility() != View.GONE) {
+            spinner.setSelection(0);
+        }
+
         Log.d(TAG, "================= BEFORE =================");
         for(int i=0;i<CurrentItems.getInstance().getCurrDay()+1;i++) {
             Log.d(TAG, "DAY " + i + " " + CurrentItems.getInstance().getSwipedRight().get(i).toString());
@@ -97,6 +144,11 @@ public class MapFragment extends Fragment {
     }
 
     private void getDirections(View view, int day) {
+
+        // Prepare a new ArrayList in currentMarkers and currentPolylines that will contain this day's markers and polylines.
+        currentMarkers.put(day, new ArrayList<>());
+        currentPolylines.put(day, new ArrayList<>());
+
         polylineOptions = new PolylineOptions();
 
         swipedRight = CurrentItems.getInstance().getAsLatLng(day);
@@ -109,7 +161,6 @@ public class MapFragment extends Fragment {
         for(int i = 1; i<swipedRight.size()-1; i++) {
             mWaypoints.add(swipedRight.get(i));
         }
-
 
         // Create ArrayList containing all markers to add to the map. Origin and destination markers are colored different from the waypoint markers.
         markers = new ArrayList<>();
@@ -126,8 +177,6 @@ public class MapFragment extends Fragment {
         markers.add(new MarkerOptions()
                 .position(new LatLng(swipedRight.get(swipedRight.size()-1).lat, swipedRight.get(swipedRight.size()-1).lng))
                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ROSE)));
-
-        //Log.d(TAG, "DAY " + day + " " + "markers size  " + markers.size());
 
         // Create a request for calculating and returning the final route
         DirectionsApiRequest request =
@@ -155,21 +204,14 @@ public class MapFragment extends Fragment {
         Random rnd = new Random();
         int color = Color.argb(255, rnd.nextInt(256), rnd.nextInt(256), rnd.nextInt(256));
         polylineOptions.color(color);
-        mMap.addPolyline(polylineOptions);
+        currentPolylines.get(day).add(mMap.addPolyline(polylineOptions));
 
         // Add all the markers to the map
         for(int i = 0; i<markers.size(); i++) {
-            // Don't duplicate the hotel's makrer - for Star routes only
-            if(day > 0) {
-                //Log.d(TAG, "SKIPPED MARKER: " + markers.get(i).getPosition().toString());
-                //if(i == 0) continue;
-            }
-            mMap.addMarker(markers.get(i)).setTag(i);
+            Marker m = mMap.addMarker(markers.get(i));
+            m.setTag(new int[] {day, i});
+            currentMarkers.get(day).add(m);
         }
-
-//        for(MarkerOptions m : markers) {
-//            mMap.addMarker(m);
-//        }
 
         mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @Override
@@ -179,7 +221,9 @@ public class MapFragment extends Fragment {
                 builder.setTitle("Choose:")
                         .setItems(R.array.marker_options_array, new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int which) {
-                                int markerIndex = (Integer) marker.getTag();
+                                int[] markerInfo = (int[]) marker.getTag();
+                                int markerIndex = markerInfo[1];
+                                int markerDay = markerInfo[0];
                                 switch(which) {
                                     case 0:
                                         //Get user's preferences (from 'SETTINGS' fragment)
@@ -189,7 +233,11 @@ public class MapFragment extends Fragment {
                                             break;
                                         }
 
-                                        CurrentItems.getInstance().getSwipedRight().get(day).remove(markerIndex);
+                                        CurrentItems.getInstance().getSwipedRight().get(markerDay).remove(markerIndex);
+
+                                        Log.d(TAG, "REMOVING MARKER: " + markerIndex + " FROM DAY: " + markerInfo[1]);
+                                        Log.d(TAG, "SUPPOSED DAY: " + day);
+
                                         Log.d(TAG, "================= AFTER =================");
                                         for(int i=0;i<CurrentItems.getInstance().getCurrDay()+1;i++) {
                                             Log.d(TAG, "DAY " + i + " " + CurrentItems.getInstance().getSwipedRight().get(i).toString());
@@ -232,5 +280,51 @@ public class MapFragment extends Fragment {
             resultList.add(new com.google.android.gms.maps.model.LatLng(item.lat, item.lng));
         }
         return resultList;
+    }
+
+    @Override
+    public void onItemSelected(AdapterView<?> adapterView, View view, int pos, long id) {
+        Log.d(TAG, "SPIN SELECTED " + pos);
+        if(pos == 0) {
+            currentMarkers.forEach((key, value) -> {
+                for(Marker m : value) {
+                    m.setVisible(true);
+                }
+            });
+            currentPolylines.forEach((key, value) -> {
+                for(Polyline p : value) {
+                    p.setVisible(true);
+                }
+            });
+        } else {
+            currentMarkers.forEach((key, value) -> {
+                if(key == pos-1) {
+                    for(Marker m : value) {
+                        m.setVisible(true);
+                    }
+                } else {
+                    for(Marker m : value) {
+                        m.setVisible(false);
+                    }
+                }
+            });
+
+            currentPolylines.forEach((key, value) -> {
+                if(key == pos-1) {
+                    for(Polyline p : value) {
+                        p.setVisible(true);
+                    }
+                } else {
+                    for(Polyline p : value) {
+                        p.setVisible(false);
+                    }
+                }
+            });
+        }
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> adapterView) {
+
     }
 }
