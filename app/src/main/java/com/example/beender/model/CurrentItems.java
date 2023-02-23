@@ -107,4 +107,8 @@ public class CurrentItems {
         // Set the chosen hotel as the starting point of this day's route
         swipedRight.get(currDay).add(chosenHotel);
     }
+
+    public void reset() {
+        single_instance = null;
+    }
 }

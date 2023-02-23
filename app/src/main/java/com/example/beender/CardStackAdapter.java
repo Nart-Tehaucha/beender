@@ -52,11 +52,6 @@ public class CardStackAdapter extends RecyclerView.Adapter<CardStackAdapter.View
         }
 
         void setData(ItemModel data) {
-//            Picasso.get()
-//                    .load(data.getImage())
-//                    .fit()
-//                    .centerCrop()
-//                    .into(image);
             image.setImageBitmap(data.getImage());
             name.setText(data.getName());
             city.setText(data.getCity());

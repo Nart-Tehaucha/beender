@@ -1,5 +1,6 @@
 package com.example.beender;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
@@ -16,6 +17,7 @@ import androidx.navigation.ui.NavigationUI;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceManager;
 
+import com.example.beender.model.CurrentItems;
 import com.example.beender.ui.dashboard.DashboardFragment;
 import com.example.beender.util.Settings;
 import com.google.android.gms.common.api.Status;
@@ -23,6 +25,7 @@ import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.maps.GeoApiContext;
 
 import java.util.Arrays;
@@ -31,6 +34,7 @@ import java.util.Set;
 
 public class MainActivity extends AppCompatActivity {
 
+    private FirebaseAuth mAuth;
     private static final String TAG = DashboardFragment.class.getSimpleName();
     public static final GeoApiContext gaContext = new GeoApiContext.Builder().apiKey(BuildConfig.MAPS_API_KEY).build();
     public static int routeType; // 0 - Normal, 1 - Star
@@ -43,6 +47,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        mAuth = FirebaseAuth.getInstance();
+
         BottomNavigationView navView = findViewById(R.id.nav_view);
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
@@ -81,7 +88,11 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(this, "My Profile BTN pressed", Toast.LENGTH_SHORT).show();
                 break;
             case R.id.logoutBTN:
-                Toast.makeText(this, "Logout BTN pressed", Toast.LENGTH_SHORT).show();
+                CurrentItems.getInstance().reset();
+                mAuth.signOut();
+                Intent intent = new Intent(this, AuthActivity.class);
+                startActivity(intent);
+                finish();
                 break;
         }
         return super.onOptionsItemSelected(item);

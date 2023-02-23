@@ -10,12 +10,12 @@ import android.graphics.Point;
 import android.os.Build;
 import android.os.Bundle;
 
-import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.navigation.Navigation;
 import androidx.preference.PreferenceManager;
 
+import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -28,6 +28,7 @@ import android.widget.Toast;
 import com.example.beender.model.CurrentItems;
 import com.example.beender.model.ItemModel;
 import com.example.beender.ui.dashboard.DashboardFragment;
+import com.example.beender.util.FireStoreUtils;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -40,6 +41,7 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.maps.DirectionsApi;
 import com.google.maps.DirectionsApiRequest;
 import com.google.maps.GeoApiContext;
@@ -61,6 +63,8 @@ public class MapFragment extends Fragment implements AdapterView.OnItemSelectedL
     private static final String TAG = DashboardFragment.class.getSimpleName();
     private GoogleMap mMap;
     private Spinner spinner;
+    private FloatingActionButton btnArchive;
+
 
     List<com.google.maps.model.LatLng> swipedRight;
     List<com.google.maps.model.LatLng> mWaypoints;
@@ -120,11 +124,18 @@ public class MapFragment extends Fragment implements AdapterView.OnItemSelectedL
             spinner.setVisibility(View.GONE);
         }
 
+        btnArchive = view.findViewById(R.id.btnArchive);
+        btnArchive.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                FireStoreUtils.archiveTrip();
+            }
+
+        });
 
         // Return view
         return view;
     }
-
 
 
     private void prepareMap(View view) {
