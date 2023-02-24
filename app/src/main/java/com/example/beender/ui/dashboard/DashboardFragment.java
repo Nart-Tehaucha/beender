@@ -47,6 +47,7 @@ import com.google.android.gms.location.CurrentLocationRequest;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 //import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Dash;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.api.net.PlacesClient;
@@ -278,6 +279,7 @@ public class DashboardFragment extends Fragment {
         CardStackView cardStackView = root.findViewById(R.id.card_stack_view);
 
         manager = new CardStackLayoutManager(getContext(), new CardStackListener() {
+
             @Override
             public void onCardDragging(Direction direction, float ratio) {
                 //Log.d(TAG, "onCardDragging: d=" + direction.name() + " ratio=" + ratio);
@@ -285,10 +287,17 @@ public class DashboardFragment extends Fragment {
 
             @Override
             public void onCardSwiped(Direction direction) {
-                Log.d(TAG, "onCardSwiped: p=" + manager.getTopPosition() + " d=" + direction);
+                Log.d(TAG, "onCardSwiped: p=" + manager.getTopPosition() + " d=" + direction + " manager.getItemCount() = " + manager.getItemCount());
+
+
+
+
                 if (direction == Direction.Right){
 
                     ItemModel swipedItem = adapter.getItems().get(manager.getTopPosition() - 1);
+
+                    Log.d(TAG, "onCardSwiped right: currentItem=" + swipedItem.getName());
+
                     CurrentItems.getInstance().addToSwipedRight(swipedItem);
 
                     // Remove the swiped item from CurrStack
@@ -299,6 +308,9 @@ public class DashboardFragment extends Fragment {
                 }
                 if (direction == Direction.Left){
                     ItemModel swipedItem = adapter.getItems().get(manager.getTopPosition() - 1);
+
+                    Log.d(TAG, "onCardSwiped left: currentItem=" + swipedItem.getName());
+
                     // Remove the swiped item from CurrStack
                     CurrentItems.getInstance().getCurrStack().get(0).remove(swipedItem);
                 }
@@ -368,10 +380,15 @@ public class DashboardFragment extends Fragment {
             @Override
             public boolean onInterceptTouchEvent(@NonNull RecyclerView rv, @NonNull MotionEvent e) {
                 if (mGestureDetector.onTouchEvent(e) && adapter != null && adapter.getItemCount() > 0) {
-                    ItemModel swipedItem = adapter.getItems().get(manager.getTopPosition());
+                    Log.d(TAG, "onCardClicked: p=" + manager.getTopPosition());
+
+                    ItemModel topItem = adapter.getItems().get(manager.getTopPosition() );
+
+                    Log.d(TAG, "onCardClicked: currentItem=" + topItem.getName());
+
 
                     Bundle bundle = new Bundle();
-                    bundle.putSerializable("attraction", swipedItem);
+                    bundle.putSerializable("attraction", topItem);
 
                     Navigation.findNavController(root).navigate(R.id.action_navigation_dashboard_to_attractionPageFragment, bundle);
                 }
@@ -400,7 +417,7 @@ public class DashboardFragment extends Fragment {
 //
     private List<ItemModel> addList() {
         if(CurrentItems.getInstance().getCurrStack().containsKey(0)) {
-            return CurrentItems.getInstance().getCurrStack().get(0);
+            return (List<ItemModel>) CurrentItems.getInstance().getCurrStack().get(0).clone();
         }
         List<ItemModel> items = new ArrayList<>();
         return items;

@@ -28,6 +28,8 @@ public class FetchImage extends AsyncTask<String, String, Bitmap> {
 
     @Override
     protected void onPostExecute(Bitmap b) {
-        Log.d(TAG, "Fetched Image");
+
+//        Log.d(TAG, "Fetched Image");
+
     }
 }

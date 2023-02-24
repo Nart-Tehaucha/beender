@@ -7,6 +7,7 @@ import com.example.beender.util.FetchData;
 import com.example.beender.util.FetchImage;
 import com.example.beender.util.SearchNearby;
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
@@ -24,6 +25,9 @@ public class ItemModel implements Serializable {
     private int type; // 0 - Destination, 1 - Hotel
 
     private transient ItemAdditionalData additionalData;
+    private Runnable onImageLoadedListener;
+
+    private boolean isDoneLoadingImages = false;
 
     public ItemModel() {
     }
@@ -40,6 +44,14 @@ public class ItemModel implements Serializable {
         this.type = type;
 
 
+    }
+
+    public void setImageLoadedListener(Runnable onImageLoadedListener) {
+        this.onImageLoadedListener = onImageLoadedListener;
+    }
+
+    private void onImageLoaded() {
+        onImageLoadedListener.run();
     }
 
     public ItemAdditionalData fetchAdditionalData() {
@@ -78,12 +90,8 @@ public class ItemModel implements Serializable {
         }
 
         ArrayList<Bitmap> images = null;
-        try {
-            images = buildImagesList(locationDetails);
-        } catch (IOException | ExecutionException | InterruptedException e) {
-            e.printStackTrace();
-            images = new ArrayList<>(); // Return empty images
-        }
+        images = buildImagesList(locationDetails);
+
 
         String description = null;
         try {
@@ -129,11 +137,32 @@ public class ItemModel implements Serializable {
         return resultStr;
     }
 
-    private ArrayList<Bitmap> buildImagesList(JsonObject locationDetails) throws IOException, ExecutionException, InterruptedException {
+    private ArrayList<Bitmap> buildImagesList(JsonObject locationDetails) {
         ArrayList<Bitmap> images = new ArrayList<>();
-        for (JsonElement imageJson : locationDetails.get("result").getAsJsonObject().get("photos").getAsJsonArray()) {
-            String imageRef = imageJson.getAsJsonObject().get("photo_reference").getAsString();
-            images.add(SearchNearby.getPlacePhoto(imageRef));
+        JsonArray imageJsons = locationDetails.get("result").getAsJsonObject().get("photos").getAsJsonArray();
+
+        for (JsonElement imageJson : imageJsons) {
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    synchronized (images) {
+                        String imageRef = imageJson.getAsJsonObject().get("photo_reference").getAsString();
+                        try {
+                            images.add(SearchNearby.getPlacePhoto(imageRef));
+
+                            if (images.size() == imageJsons.size()) {
+                                isDoneLoadingImages = true;
+                            }
+
+                            onImageLoaded();
+
+                        } catch (IOException | InterruptedException | ExecutionException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }).start();
+
         }
 
         return images;
@@ -200,5 +229,9 @@ public class ItemModel implements Serializable {
 
     public String printPosition() {
         return String.valueOf(lat) + "," + String.valueOf(lng);
+    }
+
+    public boolean isDoneLoadingImages() {
+        return isDoneLoadingImages;
     }
 }

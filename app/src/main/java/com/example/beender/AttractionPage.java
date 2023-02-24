@@ -1,23 +1,20 @@
 package com.example.beender;
 
-import android.content.Intent;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.graphics.Insets;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.Typeface;
-import android.net.Uri;
 import android.os.Bundle;
 
-import android.text.Html;
+import android.os.Handler;
+import android.os.Looper;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
-import android.text.Spanned;
-import android.text.format.DateUtils;
 import android.text.style.ForegroundColorSpan;
-import android.text.style.ImageSpan;
 import android.text.style.RelativeSizeSpan;
 import android.text.style.StyleSpan;
 import android.util.TypedValue;
@@ -31,6 +28,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
@@ -38,11 +36,7 @@ import com.example.beender.model.ItemAdditionalData;
 import com.example.beender.model.ItemModel;
 import com.example.beender.model.Review;
 
-import org.w3c.dom.Text;
-
 import java.util.List;
-
-import io.opencensus.trace.Span;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -94,6 +88,12 @@ public class AttractionPage extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        attractionArg.setImageLoadedListener(() -> {
+            new Handler(Looper.getMainLooper()).post(() -> {
+                setThumbnails(view, attractionArg.fetchAdditionalData().getImages());
+            });
+        });
+
         initializeViews(view);
 
     }
@@ -199,37 +199,73 @@ public class AttractionPage extends Fragment {
         mainImage.setImageBitmap(images.get(currentPosition));
     }
 
-    private void setAllImagesByCurrentPosition(View parent, List<Bitmap> images) {
+    private void setAllImages(View parent, List<Bitmap> images) {
         setMainImage(parent, images, 0);
+        setThumbnails(parent, images);
+    }
 
-        LinearLayout thumbnailLayout = parent.findViewById(R.id.thumbnail_layout);
-        int width = getResources().getDisplayMetrics().widthPixels / 3; // get 1/3rd of the screen width
-        int height = (int) (width * 0.5); // set the height proportional to the width
+    private void setThumbnails(View parent, List<Bitmap> images) {
+        try {
+            LinearLayout thumbnailLayout = parent.findViewById(R.id.thumbnail_layout);
+            thumbnailLayout.removeAllViews();
 
-        int padding = 4; // in dp
-        float scale = getResources().getDisplayMetrics().density;
-        int pixelPadding = (int) (padding * scale + 0.5f);
+            int width = getResources().getDisplayMetrics().widthPixels / 3; // get 1/3rd of the screen width
+            int height = (int) (width * 0.5); // set the height proportional to the width
 
-        for (int i = 0; i < images.size(); i++) {
-            Bitmap image = images.get(i);
-            ImageView imageView = new ImageView(getContext());
-            imageView.setLayoutParams(new LinearLayout.LayoutParams(width, height));
+            int padding = 4; // in dp
+            float scale = getResources().getDisplayMetrics().density;
+            int pixelPadding = (int) (padding * scale + 0.5f);
+
+            for (int i = 0; i < images.size(); i++) {
+                addSingleThumbail(parent, thumbnailLayout, width, height, pixelPadding, images, i);
+            }
+
+            if (!attractionArg.isDoneLoadingImages()) {
+                addSingleThumbail(parent, thumbnailLayout, width, height, pixelPadding, images, -1);
+            }
+        } catch (IllegalStateException e) {
+            if (getContext() == null) {
+                // This is fine - means the page was closed before loading was complete.
+            } else {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void addSingleThumbail(View parent,  LinearLayout thumbnailLayout, int width, int height, int pixelPadding, List<Bitmap> images, final int index) {
+        boolean isRealImage = index >= 0;
+
+        ImageView imageView = new ImageView(getContext());
+        imageView.setLayoutParams(new LinearLayout.LayoutParams(width, height));
+        imageView.setPadding(pixelPadding, 0, pixelPadding, 0);
+
+        if (isRealImage) {
             imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-            imageView.setPadding(pixelPadding, 0, pixelPadding, 0);
+            Bitmap image = images.get(index);
             imageView.setImageBitmap(image);
 
-
-            int finalI = i;
             imageView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                setMainImage(parent, images, finalI);
-            }
-        });
+                @Override
+                public void onClick(View view) {
+                    setMainImage(parent, images, index);
+                }
+            });
+        } else {
+            imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
+            Bitmap image = BitmapFactory.decodeResource(getResources(), R.drawable.loading);
 
-            thumbnailLayout.addView(imageView);
+            int color = getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
+            if (color == Configuration.UI_MODE_NIGHT_YES) {
+                imageView.setColorFilter(Color.WHITE);
+            } else {
+                imageView.setColorFilter(Color.BLACK);
+            }
+
+            imageView.setImageBitmap(image);
+
         }
 
+        thumbnailLayout.addView(imageView);
     }
 
     private void initializeViews(View parent) {
@@ -242,7 +278,7 @@ public class AttractionPage extends Fragment {
         if (images.size() == 0) {
             attractionImage.setImageBitmap(attractionArg.getImage());
         } else {
-            setAllImagesByCurrentPosition(parent, images);
+            setAllImages(parent, images);
         }
 
 
