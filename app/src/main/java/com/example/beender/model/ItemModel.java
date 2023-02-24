@@ -146,6 +146,10 @@ public class ItemModel implements Serializable {
 
             String fullDescription = page.get("extract").getAsString();
 
+            if (fullDescription.startsWith("There are a number of") || fullDescription.split("\n")[0].contains("may refer to")) {
+                return NO_DESCRIPTION;
+            }
+
             return fullDescription;
         }
 

@@ -126,6 +126,11 @@ public class AttractionPage extends Fragment {
 
         List<Review> reviews = additionalData.getReviews();
         LinearLayout reviewsLayout = (LinearLayout)parent.findViewById(R.id.reviews_layout);
+
+        if (reviews == null) {
+            return;
+        }
+
         for (Review review : reviews) {
 
             ImageView profilePicture = new ImageView(getContext());
