@@ -36,8 +36,8 @@
                     <ImageView
                         android:id="@+id/main_image"
                         android:layout_width="match_parent"
-                        android:layout_height="250dp"
-                        android:scaleType="centerCrop"
+                        android:layout_height="350dp"
+                        android:scaleType="fitCenter"
                         android:src="@drawable/sample1" />
 
                     <HorizontalScrollView
