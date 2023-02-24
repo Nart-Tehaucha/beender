@@ -91,6 +91,12 @@
 
             </RelativeLayout>
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:orientation="horizontal">
+
             <TextView
                 android:id="@+id/attraction_title"
                 android:layout_width="wrap_content"
@@ -98,6 +104,18 @@
                 android:textSize="24sp"
                 android:padding="8dp"
                 android:text="Attraction Title" />
+
+            <TextView
+                android:id="@+id/attraction_url"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="20sp"
+                android:padding="8dp"
+                android:fontFamily="times new roman"
+                android:text="🌐"
+                />
+
+        </LinearLayout>
 
             <LinearLayout
                 android:id="@+id/stars_layout"
@@ -107,17 +125,6 @@
                 android:orientation="horizontal">
 
             </LinearLayout>
-
-                <TextView
-                    android:id="@+id/attraction_url"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:padding="10dp"
-                    android:gravity="center_horizontal"
-                    android:textSize="14sp"
-                    android:text="https://www.example.com"
-                    android:textStyle="bold|italic"
-                    />
 
             <TextView
                 android:layout_width="match_parent"

@@ -202,7 +202,7 @@ public class AttractionPage extends Fragment {
             urlView.setVisibility(View.GONE);
             return;
         }
-        urlView.setText(url);
+//        urlView.setText(url);
         urlView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
