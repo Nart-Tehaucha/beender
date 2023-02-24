@@ -234,4 +234,8 @@ public class ItemModel implements Serializable {
     public boolean isDoneLoadingImages() {
         return isDoneLoadingImages;
     }
+
+    public void setImage(Bitmap image) {
+        this.image = image;
+    }
 }
