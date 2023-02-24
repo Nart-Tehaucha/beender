@@ -1,23 +1,22 @@
 package com.example.beender;
 
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.graphics.Insets;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
 
-import android.text.Html;
+import android.os.Handler;
+import android.os.Looper;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
-import android.text.Spanned;
-import android.text.format.DateUtils;
 import android.text.style.ForegroundColorSpan;
-import android.text.style.ImageSpan;
 import android.text.style.RelativeSizeSpan;
 import android.text.style.StyleSpan;
 import android.util.TypedValue;
@@ -27,10 +26,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
@@ -38,17 +39,8 @@ import com.example.beender.model.ItemAdditionalData;
 import com.example.beender.model.ItemModel;
 import com.example.beender.model.Review;
 
-import org.w3c.dom.Text;
-
 import java.util.List;
 
-import io.opencensus.trace.Span;
-
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link AttractionPage#newInstance} factory method to
- * create an instance of this fragment.
- */
 public class AttractionPage extends Fragment {
 
     // TODO: Rename parameter arguments, choose names that match
@@ -94,7 +86,15 @@ public class AttractionPage extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        attractionArg.setImageLoadedListener(() -> {
+            new Handler(Looper.getMainLooper()).post(() -> {
+                setThumbnails(view, attractionArg.fetchAdditionalData().getImages());
+            });
+        });
+
         initializeViews(view);
+
+        ((MainActivity)getActivity()).getLoadingDialog().dismiss();
 
     }
 
@@ -102,14 +102,15 @@ public class AttractionPage extends Fragment {
         LinearLayout starsLayout = (LinearLayout)parent.findViewById(R.id.stars_layout);
 
         double attractionRating = attractionArg.getRatingAsDouble();
-        for (int i = 0; i < attractionRating; i++) {
+        double roundedAttractionRating = Math.ceil(attractionRating * 2) / 2.0;
+        for (int i = 0; i < roundedAttractionRating; i++) {
             ImageView star = new ImageView(getContext());
             star.setColorFilter(new PorterDuffColorFilter(ContextCompat.getColor(getContext(), com.google.android.libraries.places.R.color.quantum_yellow), PorterDuff.Mode.SRC_IN));
             int sizeInDp = 30;
             int sizeInPx = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, sizeInDp, getResources().getDisplayMetrics());
             star.setLayoutParams(new ViewGroup.LayoutParams(sizeInPx, sizeInPx));
 
-            if (attractionRating - i > 1) {
+            if (roundedAttractionRating - i >= 1) {
                 star.setImageResource(R.drawable.star_filled);
             } else {
                 star.setImageResource(R.drawable.star_half);
@@ -125,6 +126,11 @@ public class AttractionPage extends Fragment {
 
         List<Review> reviews = additionalData.getReviews();
         LinearLayout reviewsLayout = (LinearLayout)parent.findViewById(R.id.reviews_layout);
+
+        if (reviews == null) {
+            return;
+        }
+
         for (Review review : reviews) {
 
             ImageView profilePicture = new ImageView(getContext());
@@ -193,40 +199,107 @@ public class AttractionPage extends Fragment {
         }
     }
 
-    private void setAllImagesByCurrentPosition(View parent, List<Bitmap> images, int currentPosition) {
+    private void setUpUrl(View parent) {
+        TextView urlView = parent.findViewById(R.id.attraction_url);
+        String url = attractionArg.fetchAdditionalData().getWebsite();
+
+        if (url == null){
+            urlView.setVisibility(View.GONE);
+            return;
+        }
+//        urlView.setText(url);
+        urlView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Open the Wikipedia page for the attraction
+                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                startActivity(intent);
+            }
+        });
+
+    }
+
+    private void setMainImage(View parent, List<Bitmap> images, int currentPosition) {
         ImageView mainImage = (ImageView)parent.findViewById(R.id.main_image);
         mainImage.setImageBitmap(images.get(currentPosition));
+    }
 
-        //TODO: This duplicate code is ugly, better to create an array for all the thumbails and do this in a loop. But I'm feeling pretty lazy now.
-        final int nextPosition1 = (currentPosition + 1) % images.size();
-        ImageView thumbnail1 = (ImageView)parent.findViewById(R.id.thumbnail_1);
-        thumbnail1.setImageBitmap(images.get(nextPosition1));
-        thumbnail1.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                setAllImagesByCurrentPosition(parent, images, nextPosition1);
-            }
-        });
+    private void setAllImages(View parent, List<Bitmap> images) {
+        setMainImage(parent, images, 0);
+        setThumbnails(parent, images);
+    }
 
-        final int nextPosition2 = (currentPosition + 2) % images.size();
-        ImageView thumbnail2 = (ImageView)parent.findViewById(R.id.thumbnail_2);
-        thumbnail2.setImageBitmap(images.get(nextPosition2));
-        thumbnail2.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                setAllImagesByCurrentPosition(parent, images, nextPosition2);
-            }
-        });
+    private void setThumbnails(View parent, List<Bitmap> images) {
+        try {
+            LinearLayout thumbnailLayout = parent.findViewById(R.id.thumbnail_layout);
+            thumbnailLayout.removeAllViews();
 
-        final int nextPosition3 = (currentPosition + 3) % images.size();
-        ImageView thumbnail3 = (ImageView)parent.findViewById(R.id.thumbnail_3);
-        thumbnail3.setImageBitmap(images.get(nextPosition3));
-        thumbnail3.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                setAllImagesByCurrentPosition(parent, images, nextPosition3);
+            int width = getResources().getDisplayMetrics().widthPixels / 3; // get 1/3rd of the screen width
+            int height = (int) (width * 0.5); // set the height proportional to the width
+
+            int padding = 4; // in dp
+            float scale = getResources().getDisplayMetrics().density;
+            int pixelPadding = (int) (padding * scale + 0.5f);
+
+            for (int i = 0; i < images.size(); i++) {
+                addSingleThumbail(parent, thumbnailLayout, width, height, pixelPadding, images, i);
             }
-        });
+
+            if (!attractionArg.isDoneLoadingImages()) {
+                addSingleThumbail(parent, thumbnailLayout, width, height, pixelPadding, images, -1);
+            }
+        } catch (IllegalStateException e) {
+            if (getContext() == null) {
+                // This is fine - means the page was closed before loading was complete.
+            } else {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void addSingleThumbail(View parent,  LinearLayout thumbnailLayout, int width, int height, int pixelPadding, List<Bitmap> images, final int index) {
+        boolean isRealImage = index >= 0;
+
+
+
+        if (isRealImage) {
+            ImageView imageView = new ImageView(getContext());
+            imageView.setLayoutParams(new LinearLayout.LayoutParams(width, height));
+            imageView.setPadding(pixelPadding, 0, pixelPadding, 0);
+
+            imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+            Bitmap image = images.get(index);
+            imageView.setImageBitmap(image);
+
+            imageView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    setMainImage(parent, images, index);
+                }
+            });
+
+            thumbnailLayout.addView(imageView);
+
+        } else {
+            ProgressBar progressBar = new ProgressBar(getContext());
+            progressBar.setLayoutParams(new LinearLayout.LayoutParams(width, height));
+            progressBar.setPadding(pixelPadding, 0, pixelPadding, 0);
+//            imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
+//            Bitmap image = BitmapFactory.decodeResource(getResources(), R.drawable.loading);
+//
+//            int color = getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
+//            if (color == Configuration.UI_MODE_NIGHT_YES) {
+//                imageView.setColorFilter(Color.WHITE);
+//            } else {
+//                imageView.setColorFilter(Color.BLACK);
+//            }
+//
+//            imageView.setImageBitmap(image);
+
+            thumbnailLayout.addView(progressBar);
+
+
+        }
 
     }
 
@@ -240,12 +313,13 @@ public class AttractionPage extends Fragment {
         if (images.size() == 0) {
             attractionImage.setImageBitmap(attractionArg.getImage());
         } else {
-            setAllImagesByCurrentPosition(parent, images, 0);
+            setAllImages(parent, images);
         }
 
 
         setUpStars(parent);
         setUpReviews(parent);
+        setUpUrl(parent);
 
         TextView attractionDescription = (TextView)parent.findViewById(R.id.attraction_description);
         TextView readMore = (TextView)parent.findViewById(R.id.read_more);
@@ -265,6 +339,7 @@ public class AttractionPage extends Fragment {
 //                    startActivity(intent);
 
                     attractionDescription.setText(attractionArg.fetchAdditionalData().getDescription());
+                    readMore.setVisibility(View.GONE);
 
                 }
             });
@@ -279,4 +354,6 @@ public class AttractionPage extends Fragment {
 
 
     }
+
+
 }

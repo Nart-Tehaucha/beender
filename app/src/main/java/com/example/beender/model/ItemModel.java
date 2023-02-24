@@ -7,6 +7,7 @@ import com.example.beender.util.FetchData;
 import com.example.beender.util.FetchImage;
 import com.example.beender.util.SearchNearby;
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
@@ -17,6 +18,8 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 public class ItemModel implements Serializable {
+    private static final String NO_DESCRIPTION = "No description available";
+
     private String placeId;
     private transient Bitmap image;
     private String name, city, country, rating;
@@ -24,6 +27,9 @@ public class ItemModel implements Serializable {
     private int type; // 0 - Destination, 1 - Hotel
 
     private transient ItemAdditionalData additionalData;
+    private transient Runnable onImageLoadedListener;
+
+    private boolean isDoneLoadingImages = false;
 
     public ItemModel() {
     }
@@ -42,6 +48,14 @@ public class ItemModel implements Serializable {
 
     }
 
+    public void setImageLoadedListener(Runnable onImageLoadedListener) {
+        this.onImageLoadedListener = onImageLoadedListener;
+    }
+
+    private void onImageLoaded() {
+        onImageLoadedListener.run();
+    }
+
     public ItemAdditionalData fetchAdditionalData() {
         if (additionalData != null) {
             return additionalData;
@@ -49,7 +63,7 @@ public class ItemModel implements Serializable {
 
         StringBuilder stringBuilder = new StringBuilder("https://maps.googleapis.com/maps/api/place/details/json?");
         stringBuilder.append("place_id=" + placeId);
-        stringBuilder.append("&fields=name,formatted_address,formatted_phone_number,website,rating,review,photo");
+        stringBuilder.append("&fields=editorial_summary,name,formatted_address,formatted_phone_number,website,rating,review,photo");
         stringBuilder.append("&key=" + BuildConfig.MAPS_API_KEY);
 
         String url = stringBuilder.toString();
@@ -78,22 +92,31 @@ public class ItemModel implements Serializable {
         }
 
         ArrayList<Bitmap> images = null;
-        try {
-            images = buildImagesList(locationDetails);
-        } catch (IOException | ExecutionException | InterruptedException e) {
-            e.printStackTrace();
-            images = new ArrayList<>(); // Return empty images
-        }
+        images = buildImagesList(locationDetails);
 
-        String description = null;
+
+        String description;
         try {
             description = fetchDescription();
         } catch (ExecutionException | InterruptedException e) {
             e.printStackTrace();
-            description = "No description found";
+            description = NO_DESCRIPTION;
         }
 
-        additionalData = new ItemAdditionalData(images, reviews, description);
+        if (description.equals(NO_DESCRIPTION)) {
+            if (locationDetails.get("result").getAsJsonObject().get("editorial_summary") != null) {
+                description = locationDetails.get("result").getAsJsonObject().get("editorial_summary").getAsJsonObject().get("overview").getAsString();
+            }
+        }
+
+        String website;
+        try {
+            website = locationDetails.get("result").getAsJsonObject().get("website").getAsString();
+        } catch (Exception e) {
+            website = null;
+        }
+
+        additionalData = new ItemAdditionalData(images, reviews, description, website);
 
         return additionalData;
     }
@@ -114,7 +137,7 @@ public class ItemModel implements Serializable {
         JsonObject pagesJson = resultJson.get("query").getAsJsonObject().get("pages").getAsJsonObject();
         for (Map.Entry<String, JsonElement> pageEntry : pagesJson.entrySet()) {
             if (pageEntry.getKey().equals("-1")) {
-                return "No description found";
+                return NO_DESCRIPTION;
             }
             JsonObject page = pageEntry.getValue().getAsJsonObject();
             if (!page.has("extract")) {
@@ -123,41 +146,70 @@ public class ItemModel implements Serializable {
 
             String fullDescription = page.get("extract").getAsString();
 
+            if (fullDescription.startsWith("There are a number of") || fullDescription.split("\n")[0].contains("may refer to")) {
+                return NO_DESCRIPTION;
+            }
+
             return fullDescription;
         }
 
         return resultStr;
     }
 
-    private ArrayList<Bitmap> buildImagesList(JsonObject locationDetails) throws IOException, ExecutionException, InterruptedException {
+    private ArrayList<Bitmap> buildImagesList(JsonObject locationDetails) {
         ArrayList<Bitmap> images = new ArrayList<>();
-        for (JsonElement imageJson : locationDetails.get("result").getAsJsonObject().get("photos").getAsJsonArray()) {
-            String imageRef = imageJson.getAsJsonObject().get("photo_reference").getAsString();
-            images.add(SearchNearby.getPlacePhoto(imageRef));
+        JsonArray imageJsons = locationDetails.get("result").getAsJsonObject().get("photos").getAsJsonArray();
+
+        for (JsonElement imageJson : imageJsons) {
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    synchronized (images) {
+                        String imageRef = imageJson.getAsJsonObject().get("photo_reference").getAsString();
+                        try {
+                            images.add(SearchNearby.getPlacePhoto(imageRef));
+
+                            if (images.size() == imageJsons.size()) {
+                                isDoneLoadingImages = true;
+                            }
+
+                            onImageLoaded();
+
+                        } catch (IOException | InterruptedException | ExecutionException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }).start();
+
         }
 
         return images;
     }
 
     private ArrayList<Review> buildReviewsList(JsonObject locationDetails) throws ExecutionException, InterruptedException {
-        ArrayList<Review> reviews = new ArrayList<>();
-        for (JsonElement reviewJson : locationDetails.get("result").getAsJsonObject().get("reviews").getAsJsonArray()) {
-            JsonObject reviewJsonObject = reviewJson.getAsJsonObject();
+        try {
+            ArrayList<Review> reviews = new ArrayList<>();
+            for (JsonElement reviewJson : locationDetails.get("result").getAsJsonObject().get("reviews").getAsJsonArray()) {
+                JsonObject reviewJsonObject = reviewJson.getAsJsonObject();
 
-            String authorName = reviewJsonObject.get("author_name").getAsString();
-            int rating = reviewJsonObject.get("rating").getAsInt();
-            String text = reviewJsonObject.get("text").getAsString();
-            String relativeTimeDescription = reviewJsonObject.get("relative_time_description").getAsString();
-            String profilePhotoUrl = reviewJsonObject.get("profile_photo_url").getAsString();
+                String authorName = reviewJsonObject.get("author_name").getAsString();
+                int rating = reviewJsonObject.get("rating").getAsInt();
+                String text = reviewJsonObject.get("text").getAsString();
+                String relativeTimeDescription = reviewJsonObject.get("relative_time_description").getAsString();
+                String profilePhotoUrl = reviewJsonObject.get("profile_photo_url").getAsString();
 
-            FetchImage fetchProfileImage = new FetchImage();
-            fetchProfileImage.execute(profilePhotoUrl);
-            Bitmap profilePicture = fetchProfileImage.get();
+                FetchImage fetchProfileImage = new FetchImage();
+                fetchProfileImage.execute(profilePhotoUrl);
+                Bitmap profilePicture = fetchProfileImage.get();
 
-            reviews.add(new Review(rating, authorName, text, relativeTimeDescription, profilePicture));
+                reviews.add(new Review(rating, authorName, text, relativeTimeDescription, profilePicture));
+            }
+
+            return reviews;
+        } catch (NullPointerException e) {
+            return null;
         }
-
-        return reviews;
     }
 
 
@@ -183,7 +235,11 @@ public class ItemModel implements Serializable {
     }
 
     public Double getRatingAsDouble() {
-        return Double.parseDouble(rating);
+        try {
+            return Double.parseDouble(rating);
+        } catch (Exception e) {
+            return 0.0;
+        }
     }
 
     public double getLat() {
@@ -200,5 +256,13 @@ public class ItemModel implements Serializable {
 
     public String printPosition() {
         return String.valueOf(lat) + "," + String.valueOf(lng);
+    }
+
+    public boolean isDoneLoadingImages() {
+        return isDoneLoadingImages;
+    }
+
+    public void setImage(Bitmap image) {
+        this.image = image;
     }
 }

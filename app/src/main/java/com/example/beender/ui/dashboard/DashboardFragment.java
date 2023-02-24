@@ -2,6 +2,7 @@ package com.example.beender.ui.dashboard;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
@@ -12,7 +13,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.SystemClock;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
@@ -23,13 +23,14 @@ import android.view.animation.LinearInterpolator;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.NavController;
+import androidx.navigation.NavDestination;
 import androidx.navigation.Navigation;
 import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.DefaultItemAnimator;
@@ -51,6 +52,7 @@ import com.google.android.gms.location.CurrentLocationRequest;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 //import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Dash;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.api.net.PlacesClient;
@@ -97,8 +99,6 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class DashboardFragment extends Fragment {
 
@@ -194,7 +194,6 @@ public class DashboardFragment extends Fragment {
 
                     // If the trip type is "Journey" OR if we reached the final day, navigate to the map fragment and display the routes.
                     else {
-
                         Navigation.findNavController(view).navigate(R.id.action_navigation_dashboard_to_navigation_map);
                     }
                 }
@@ -232,45 +231,62 @@ public class DashboardFragment extends Fragment {
             @Override
             public void onPlaceSelected(@NonNull Place place) {
 
-                double lat = place.getLatLng().latitude;
-                double lng = place.getLatLng().longitude;
-                try {
-                    updateList(SearchNearby.getNearbyPlaces(lat, lng, "tourist_attraction"));
-                } catch (ExecutionException e) {
-                    e.printStackTrace();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+                ((MainActivity)getActivity()).getLoadingDialog().show();
+                Toast.makeText(getContext(), "Searching for cool places in  " + place.getName() +"...", Toast.LENGTH_SHORT).show();
 
 
-                //If the trip type is a star, we first asל the user to choose a hotel.
-                if(sharedPreferences.getString("kind_of_trip", "").equals("Star")) {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                    builder.setMessage("Let's start by finding a Hotel!")
-                            .setPositiveButton(R.string.alertOk, new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int id) {
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
 
-                                    // Navigate to find hotel fragment
-                                    Bundle bundle = new Bundle();
-                                    bundle.putDoubleArray("latlng", new double[]{place.getLatLng().latitude, place.getLatLng().longitude});
-                                    bundle.putInt("markerIndex", 0);
-                                    bundle.putString("parentFrag", "dashboard");
-                                    Navigation.findNavController(view).navigate(R.id.action_navigation_dashboard_to_hotelSearchFragment, bundle);
-                                }
-                            })
-                            .setNegativeButton(R.string.alertCancel, new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int id) {
-                                    // User cancelled the dialog
-                                    dialog.cancel();
-                                }
-                            });
-                    AlertDialog dialog = builder.create();
-                    dialog.show();
-                }
+                        double lat = place.getLatLng().latitude;
+                        double lng = place.getLatLng().longitude;
+                        List<ItemModel> nearbyPlaces = null;
+                        try {
+                            nearbyPlaces = SearchNearby.getNearbyPlaces(lat, lng);
+                        } catch (ExecutionException | InterruptedException e) {
+                            e.printStackTrace();
+                        }
+
+                        List<ItemModel> finalNearbyPlaces = nearbyPlaces;
+                        new Handler(Looper.getMainLooper()).post(() -> {
+
+
+                            updateList(finalNearbyPlaces);
+
+                            //If the trip type is a star, we first asל the user to choose a hotel.
+                            if(sharedPreferences.getString("kind_of_trip", "").equals("Star")) {
+                                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                                builder.setMessage("Let's start by finding a Hotel!")
+                                        .setPositiveButton(R.string.alertOk, new DialogInterface.OnClickListener() {
+                                            public void onClick(DialogInterface dialog, int id) {
+
+                                                // Navigate to find hotel fragment
+                                                Bundle bundle = new Bundle();
+                                                bundle.putDoubleArray("latlng", new double[]{place.getLatLng().latitude, place.getLatLng().longitude});
+                                                bundle.putInt("markerIndex", 0);
+                                                bundle.putString("parentFrag", "dashboard");
+                                                Navigation.findNavController(view).navigate(R.id.action_navigation_dashboard_to_hotelSearchFragment, bundle);
+                                            }
+                                        })
+                                        .setNegativeButton(R.string.alertCancel, new DialogInterface.OnClickListener() {
+                                            public void onClick(DialogInterface dialog, int id) {
+                                                // User cancelled the dialog
+                                                dialog.cancel();
+                                            }
+                                        });
+                                AlertDialog dialog = builder.create();
+                                dialog.show();
+                            }
 
                 Toast.makeText(getContext(), "Searching for cool places in  " + place.getName() +"...", Toast.LENGTH_SHORT).show();
 
-                btnFinish.setVisibility(View.VISIBLE);
+                            btnFinish.setVisibility(View.VISIBLE);
+
+                            ((MainActivity)getActivity()).getLoadingDialog().dismiss();
+                        });
+                    }
+                }).start();
             }
 
 
@@ -294,10 +310,17 @@ public class DashboardFragment extends Fragment {
 
             @Override
             public void onCardSwiped(Direction direction) {
-                Log.d(TAG, "onCardSwiped: p=" + manager.getTopPosition() + " d=" + direction);
+                Log.d(TAG, "onCardSwiped: p=" + manager.getTopPosition() + " d=" + direction + " manager.getItemCount() = " + manager.getItemCount());
+
+
+
+
                 if (direction == Direction.Right){
 
                     ItemModel swipedItem = adapter.getItems().get(manager.getTopPosition() - 1);
+
+                    Log.d(TAG, "onCardSwiped right: currentItem=" + swipedItem.getName());
+
                     CurrentItems.getInstance().addToSwipedRight(swipedItem);
 
                     // Remove the swiped item from CurrStack
@@ -308,6 +331,9 @@ public class DashboardFragment extends Fragment {
                 }
                 if (direction == Direction.Left){
                     ItemModel swipedItem = adapter.getItems().get(manager.getTopPosition() - 1);
+
+                    Log.d(TAG, "onCardSwiped left: currentItem=" + swipedItem.getName());
+
                     // Remove the swiped item from CurrStack
                     CurrentItems.getInstance().getCurrStack().get(0).remove(swipedItem);
                 }
@@ -374,16 +400,29 @@ public class DashboardFragment extends Fragment {
                     return super.onDoubleTap(e);
                 }
             });
+
+            public void onCardClicked() {
+                ((MainActivity)getActivity()).getLoadingDialog().show();
+
+                Log.d(TAG, "onCardClicked: p=" + manager.getTopPosition());
+
+                ItemModel topItem = adapter.getItems().get(manager.getTopPosition() );
+
+                Log.d(TAG, "onCardClicked: currentItem=" + topItem.getName());
+
+
+                Bundle bundle = new Bundle();
+                bundle.putSerializable("attraction", topItem);
+
+
+                Navigation.findNavController(root).navigate(R.id.action_navigation_dashboard_to_attractionPageFragment, bundle);
+
+            }
+
             @Override
             public boolean onInterceptTouchEvent(@NonNull RecyclerView rv, @NonNull MotionEvent e) {
                 if (mGestureDetector.onTouchEvent(e) && adapter != null && adapter.getItemCount() > 0) {
-                    Log.d(TAG, "onCardClicked: p=" + manager.getTopPosition());
-                    ItemModel swipedItem = adapter.getItems().get(0);
-
-                    Bundle bundle = new Bundle();
-                    bundle.putSerializable("attraction", swipedItem);
-
-                    Navigation.findNavController(root).navigate(R.id.action_navigation_dashboard_to_attractionPageFragment, bundle);
+                    onCardClicked();
                 }
                 return false;
             }
@@ -410,7 +449,7 @@ public class DashboardFragment extends Fragment {
 //
     private List<ItemModel> addList() {
         if(CurrentItems.getInstance().getCurrStack().containsKey(0)) {
-            return CurrentItems.getInstance().getCurrStack().get(0);
+            return (List<ItemModel>) CurrentItems.getInstance().getCurrStack().get(0).clone();
         }
         List<ItemModel> items = new ArrayList<>();
         return items;

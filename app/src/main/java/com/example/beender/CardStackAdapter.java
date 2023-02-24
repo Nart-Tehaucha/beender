@@ -46,7 +46,7 @@ public class CardStackAdapter extends RecyclerView.Adapter<CardStackAdapter.View
             super(itemView);
             image = itemView.findViewById(R.id.item_image);
             name = itemView.findViewById(R.id.item_name);
-            city = itemView.findViewById(R.id.item_city);
+//            city = itemView.findViewById(R.id.item_city);
             country = itemView.findViewById(R.id.item_country);
             rating = itemView.findViewById(R.id.item_rating);
         }
@@ -54,7 +54,7 @@ public class CardStackAdapter extends RecyclerView.Adapter<CardStackAdapter.View
         void setData(ItemModel data) {
             image.setImageBitmap(data.getImage());
             name.setText(data.getName());
-            city.setText(data.getCity());
+//            city.setText(data.getCity());
             country.setText(data.getCountry());
             rating.setText(data.getRating());
         }

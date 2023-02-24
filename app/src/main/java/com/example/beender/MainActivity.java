@@ -1,5 +1,6 @@
 package com.example.beender;
 
+import android.app.Dialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -7,8 +8,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -52,8 +51,15 @@ public class MainActivity extends AppCompatActivity {
     SharedPreferences sharedPreferences;
     private Settings settings;
 
+    private Dialog loadingDialog;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        loadingDialog = new Dialog(this, android.R.style.Widget);
+        loadingDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        loadingDialog.setContentView(R.layout.loading_dialog);
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -67,9 +73,28 @@ public class MainActivity extends AppCompatActivity {
         BottomNavigationView bottomNavigationView = findViewById(R.id.nav_view);
         NavigationUI.setupWithNavController(bottomNavigationView, navController);
 
+        //Get user's preferences (from 'SETTINGS' fragment)
+        this.settings = new Settings(this);
+
+        Log.i("kind_of_trip: " +settings.getKindOfTrip(), "INFO");
+        Log.i("numOfPlacesPerDay: " + settings.getNumOfPlacesPerDay(), "INFO");
+        Log.i("kmRadius: " + settings.getKmRadius().toString(), "INFO");
+        Log.i("numOfDaysForTravel: " +settings.getNumOfDaysForTravel(), "INFO");
+        Log.i("hoursOfTravel: " + settings.getHoursOfTravel(), "INFO");
+        Log.i("adaptedForChildren: " +settings.getAdaptedForChildren(), "INFO");
+        Log.i("adaptedForElders: " + settings.getAdaptedForElders(), "INFO");
+        Log.i("adapteForAWheelchair: " + settings.getAdaptedForAWheelchair(), "INFO");
+        Log.i("ratingStar: " + settings.getRatingStar(), "INFO");
+        Log.i("TypeOfPlaces: " + settings.getTypeOfPlaces(), "INFO");
+        Log.i("priceLevel: " + settings.getPriceLevel(), "INFO");
+
+
     }
 
 
+    public Dialog getLoadingDialog() {
+        return loadingDialog;
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
