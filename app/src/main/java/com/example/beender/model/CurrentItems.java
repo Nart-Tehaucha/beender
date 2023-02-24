@@ -14,6 +14,7 @@ public class CurrentItems {
 
     private HashMap<Integer, ArrayList<ItemModel>> currStack;
     private HashMap<Integer, ArrayList<ItemModel>> swipedRight;
+    HashMap<String, List<LatLng>> archiveMap;
     private ItemModel chosenHotel;
     private ArrayList<ItemModel> currStackHotels;
     private int currDay;
@@ -25,6 +26,7 @@ public class CurrentItems {
     {
         currStack = new HashMap<>();
         swipedRight = new HashMap<>();
+        archiveMap = new HashMap<>();
         currStackHotels = new ArrayList<>();
         currDay = 0;
 
@@ -41,14 +43,6 @@ public class CurrentItems {
 
         return single_instance;
     }
-
-//    public ArrayList<ItemModel> getSwipedRight() {
-//        return swipedRight;
-//    }
-//
-//    public void setSwipedRight(ArrayList<ItemModel> swipedRight) {
-//        this.swipedRight = swipedRight;
-//    }
 
 
     public HashMap<Integer, ArrayList<ItemModel>> getSwipedRight() {
@@ -81,6 +75,14 @@ public class CurrentItems {
 
     public int getCurrDay() {
         return currDay;
+    }
+
+    public HashMap<String, List<LatLng>> getArchiveMap() {
+        return archiveMap;
+    }
+
+    public void setArchiveMap(HashMap<String, List<LatLng>> archiveMap) {
+        this.archiveMap = archiveMap;
     }
 
     public List<LatLng> getAsLatLng (int day) {

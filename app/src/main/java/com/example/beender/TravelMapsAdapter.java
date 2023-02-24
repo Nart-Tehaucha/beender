@@ -1,6 +1,9 @@
 package com.example.beender;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -8,10 +11,13 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.beender.model.CurrentItems;
 import com.example.beender.model.UserTrip;
 import com.example.beender.util.FireStoreUtils;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 
 import java.text.SimpleDateFormat;
@@ -21,14 +27,9 @@ public class TravelMapsAdapter extends RecyclerView.Adapter<TravelMapsAdapter.Tr
     private Context context;
     private List<UserTrip> travelMapstList;
 
-    private com.example.beender.TravelMapsAdapter.ItemClickListener clickListenerRemove;
-    private com.example.beender.TravelMapsAdapter.ItemClickListener clickListenerEdit;
-
-    public TravelMapsAdapter(Context context, List<UserTrip> travelMapstList, com.example.beender.TravelMapsAdapter.ItemClickListener clickListenerRemove, com.example.beender.TravelMapsAdapter.ItemClickListener clickListenerEdit ) {
+    public TravelMapsAdapter(Context context, List<UserTrip> userTripList) {
         this.context = context;
-        this.travelMapstList = travelMapstList;
-        this.clickListenerRemove = clickListenerRemove;
-        this.clickListenerEdit = clickListenerEdit;
+        this.travelMapstList = userTripList;
     }
 
     public void setUserTripList(List<UserTrip> userTripList){
@@ -61,13 +62,13 @@ public class TravelMapsAdapter extends RecyclerView.Adapter<TravelMapsAdapter.Tr
         //Set on click for remove & insert buttons
         holder.deleteIV.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                clickListenerRemove.onItemClick(travelMapstList.get(position));
+                deleteTravelMap(travelMapstList.get(position), v);
             }
         });
 
-        holder.editIV.setOnClickListener(new View.OnClickListener() {
+        holder.tripImage.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                clickListenerEdit.onItemClick(travelMapstList.get(position));
+                loadToMap(travelMapstList.get(position), v);
             }
         });
 
@@ -97,12 +98,38 @@ public class TravelMapsAdapter extends RecyclerView.Adapter<TravelMapsAdapter.Tr
             tripName = itemView.findViewById(R.id.product_in_cart_name);
             tripDate = itemView.findViewById(R.id.date);
             deleteIV = itemView.findViewById(R.id.deleteIV);
-            editIV = itemView.findViewById(R.id.editIV);
         }
     }
 
-    public interface ItemClickListener {
-        public void onItemClick(UserTrip travelMap);
+    public void loadToMap(UserTrip t, View view) {
+        CurrentItems.getInstance().setArchiveMap(t.getSwipedRight());
+        Bundle bundle = new Bundle();
+        bundle.putString("parentFrag", "archive");
+        Navigation.findNavController(view).navigate(R.id.action_navigation_archive_to_navigation_map, bundle);
+    }
+
+    //This function remove open a dialog box that asks the user if he sure that
+    //he want to delete the item. if no- nothing happens.
+    //if yes- item is deleted.
+    public boolean deleteTravelMap(UserTrip tm, View view){
+        AlertDialog.Builder builder;
+        builder = new AlertDialog.Builder(view.getContext());
+        builder.setTitle("Wait").setMessage("Do you want to delete " + tm.getTitle() + "?")
+                .setCancelable(true)
+                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        dialogInterface.cancel();
+                    }
+                })
+                .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        dialogInterface.cancel();
+                    }
+                })
+                .show();
+        return true;
     }
 }
 

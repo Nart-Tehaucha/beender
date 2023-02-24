@@ -15,6 +15,7 @@ public class UserTrip {
     private String dateTime;
     private String title;
     private String id;
+    private String type; // Journey / Star
 
     public UserTrip() {};
 

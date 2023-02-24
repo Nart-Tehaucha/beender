@@ -10,6 +10,7 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -21,6 +22,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.beender.model.CurrentItems;
 import com.example.beender.model.UserTrip;
 import com.example.beender.ui.dashboard.DashboardFragment;
 import com.google.android.material.snackbar.Snackbar;
@@ -40,20 +42,16 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-public class ArchiveFragment extends Fragment implements TravelMapsAdapter.ItemClickListener{
+public class ArchiveFragment extends Fragment {
 
     private FirebaseAuth mAuth;
 
     private static final String TAG = DashboardFragment.class.getSimpleName();
-    private String currentUserID;
 
-    //Recycler view
     private RecyclerView archiveTravelMapRecyclerView;
-    //This is the adapter for the recycler
     public static TravelMapsAdapter travelMapsAdapter;
     public static List<UserTrip> trips;
 
-    private TextView categoryNameTV;
     private ConstraintLayout constraintLayout;
 
     private Context context;
@@ -79,9 +77,6 @@ public class ArchiveFragment extends Fragment implements TravelMapsAdapter.ItemC
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        if (getArguments() != null) {
-//                currentUserID = getArguments().getString("currentUserID");
-        }
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_archive, container, false);
 
@@ -89,11 +84,10 @@ public class ArchiveFragment extends Fragment implements TravelMapsAdapter.ItemC
         context = container.getContext();
         archiveTravelMapRecyclerView = view.findViewById(R.id.productsRecyclerView);
         constraintLayout = view.findViewById(R.id.fragmentScreen);
-        categoryNameTV = view.findViewById(R.id.categoryNameTV);
 
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
         archiveTravelMapRecyclerView.setLayoutManager(layoutManager);
-        travelMapsAdapter = new TravelMapsAdapter(getActivity(),trips, this::onItemClickRemove,this::onItemClickEdit);
+        travelMapsAdapter = new TravelMapsAdapter(getActivity(),trips);
         archiveTravelMapRecyclerView.setAdapter(travelMapsAdapter);
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -130,70 +124,9 @@ public class ArchiveFragment extends Fragment implements TravelMapsAdapter.ItemC
             return view;
     }
 
-    private void onItemClickEdit(UserTrip t) {
-        editTravelMap(t);
-    }
-
-    private void onItemClickRemove(UserTrip t) {
-            deleteTravelMap(t);
-    }
-
-    @Override
-    public void onItemClick(UserTrip t) {
-        //Not necessery because not in use.
-    }
-
-    //This function remove open a dialog box that asks the user if he sure that
-    //he want to delete the item. if no- nothing happens.
-    //if yes- item is deleted.
-    public boolean deleteTravelMap(UserTrip tm){
-        AlertDialog.Builder builder;
-        builder = new AlertDialog.Builder(getActivity());
-        builder.setTitle("Wait").setMessage("Do you want to delete " + tm.getTitle() + "?")
-                .setCancelable(true)
-                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        //Delete Item from DB
-                        Snackbar.make(constraintLayout, tm.getTitle() + " removed", Snackbar.LENGTH_LONG).show();
-                        //Toast.makeText(getActivity(), product.getName() + " removed", Toast.LENGTH_SHORT).show();
-                        dialogInterface.cancel();
-                    }
-                })
-                .setNegativeButton("No", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        dialogInterface.cancel();
-                    }
-                })
-                .show();
-        return true;
-    }
 
 
 
-    public boolean editTravelMap(UserTrip tm){
-        AlertDialog.Builder builder;
-        builder = new AlertDialog.Builder(getActivity());
-        builder.setTitle("Wait").setMessage("Do you want to edit " + tm.getTitle() + "?")
-                .setCancelable(true)
-                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        //Switch to edit map details fragment
-                        Toast.makeText(getActivity(), "You want to edit" + tm.getTitle(), Toast.LENGTH_SHORT).show();
-                        dialogInterface.cancel();
-                    }
-                })
-                .setNegativeButton("No", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        dialogInterface.cancel();
-                    }
-                })
-                .show();
-        return true;
-    }
 
     public static void resetDataList(){
         //Empty array list
@@ -202,4 +135,4 @@ public class ArchiveFragment extends Fragment implements TravelMapsAdapter.ItemC
     }
 
 
-    }
+}

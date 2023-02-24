@@ -64,6 +64,7 @@ public class MapFragment extends Fragment implements AdapterView.OnItemSelectedL
     private GoogleMap mMap;
     private Spinner spinner;
     private FloatingActionButton btnArchive;
+    private String parentFrag;
 
 
     List<com.google.maps.model.LatLng> swipedRight;
@@ -79,6 +80,11 @@ public class MapFragment extends Fragment implements AdapterView.OnItemSelectedL
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
+        if(getArguments().containsKey("parentFrag")) {
+            parentFrag = getArguments().getString("parentFrag");
+        } else {
+            parentFrag = "map";
+        }
         currentMarkers = new HashMap<>();
         currentPolylines = new HashMap<>();
 
@@ -94,7 +100,8 @@ public class MapFragment extends Fragment implements AdapterView.OnItemSelectedL
             @Override
             public void onMapReady(GoogleMap googleMap) {
                 mMap = googleMap;
-                if(!CurrentItems.getInstance().getSwipedRight().get(0).isEmpty()) {
+
+                if(!CurrentItems.getInstance().getSwipedRight().get(0).isEmpty() || (parentFrag.equals("archive") && !CurrentItems.getInstance().getArchiveMap().isEmpty())) {
                     prepareMap(view);
                 }
             }
@@ -125,13 +132,26 @@ public class MapFragment extends Fragment implements AdapterView.OnItemSelectedL
         }
 
         btnArchive = view.findViewById(R.id.btnArchive);
-        btnArchive.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                FireStoreUtils.archiveTrip();
-            }
+        if(getArguments() != null && getArguments().containsKey("parentFrag") && getArguments().getString("parentFrag").equals("archive")) {
+            btnArchive.setImageResource(R.drawable.ic_baseline_keyboard_tab_24);
+            btnArchive.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    getArguments().putString("parentFrag", "map");
+                    prepareMap(view);
+                }
 
-        });
+            });
+        } else {
+            btnArchive.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    FireStoreUtils.archiveTrip();
+                }
+
+            });
+        }
+
 
         // Return view
         return view;
@@ -149,8 +169,14 @@ public class MapFragment extends Fragment implements AdapterView.OnItemSelectedL
         }
         Log.d(TAG, "================= ====== =================");
 
-        for(int i = 0 ; i <= CurrentItems.getInstance().getCurrDay(); i++) {
-            getDirections(view, i);
+        if(parentFrag.equals("archive")) {
+            for(int i = 0 ; i < CurrentItems.getInstance().getArchiveMap().size(); i++) {
+                getDirections(view, i);
+            }
+        } else {
+            for(int i = 0 ; i <= CurrentItems.getInstance().getCurrDay(); i++) {
+                getDirections(view, i);
+            }
         }
     }
 
@@ -162,7 +188,13 @@ public class MapFragment extends Fragment implements AdapterView.OnItemSelectedL
 
         polylineOptions = new PolylineOptions();
 
-        swipedRight = CurrentItems.getInstance().getAsLatLng(day);
+        if(parentFrag.equals("archive")) {
+            Log.d(TAG, "DAY " + day);
+            swipedRight = CurrentItems.getInstance().getArchiveMap().get(String.valueOf(day));
+            Log.d(TAG, swipedRight.toString());
+        } else {
+            swipedRight = CurrentItems.getInstance().getAsLatLng(day);
+        }
 
         com.google.maps.model.LatLng origin = swipedRight.get(0);
         com.google.maps.model.LatLng destination = swipedRight.get(swipedRight.size()-1);
