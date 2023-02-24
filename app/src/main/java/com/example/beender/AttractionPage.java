@@ -1,5 +1,6 @@
 package com.example.beender;
 
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -7,6 +8,7 @@ import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.Typeface;
+import android.net.Uri;
 import android.os.Bundle;
 
 import android.os.Handler;
@@ -39,11 +41,6 @@ import com.example.beender.model.Review;
 
 import java.util.List;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link AttractionPage#newInstance} factory method to
- * create an instance of this fragment.
- */
 public class AttractionPage extends Fragment {
 
     // TODO: Rename parameter arguments, choose names that match
@@ -197,6 +194,26 @@ public class AttractionPage extends Fragment {
         }
     }
 
+    private void setUpUrl(View parent) {
+        TextView urlView = parent.findViewById(R.id.attraction_url);
+        String url = attractionArg.fetchAdditionalData().getWebsite();
+
+        if (url == null){
+            urlView.setVisibility(View.GONE);
+            return;
+        }
+        urlView.setText(url);
+        urlView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Open the Wikipedia page for the attraction
+                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                startActivity(intent);
+            }
+        });
+
+    }
+
     private void setMainImage(View parent, List<Bitmap> images, int currentPosition) {
         ImageView mainImage = (ImageView)parent.findViewById(R.id.main_image);
         mainImage.setImageBitmap(images.get(currentPosition));
@@ -297,6 +314,7 @@ public class AttractionPage extends Fragment {
 
         setUpStars(parent);
         setUpReviews(parent);
+        setUpUrl(parent);
 
         TextView attractionDescription = (TextView)parent.findViewById(R.id.attraction_description);
         TextView readMore = (TextView)parent.findViewById(R.id.read_more);
@@ -331,4 +349,6 @@ public class AttractionPage extends Fragment {
 
 
     }
+
+
 }
