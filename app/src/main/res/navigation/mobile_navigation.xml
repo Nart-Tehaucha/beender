@@ -18,6 +18,10 @@
             android:id="@+id/action_navigation_map_to_navigation_archive"
             app:destination="@id/navigation_archive"
             app:enterAnim="@android:anim/fade_in" />
+        <action
+            android:id="@+id/action_navigation_map_to_attractionPageFragment"
+            app:destination="@id/attractionPageFragment"
+            app:enterAnim="@android:anim/fade_in" />
     </fragment>
 
     <fragment

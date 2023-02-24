@@ -34,11 +34,11 @@ public class SearchNearby {
      * Sends our current location through an HTTP request to Places API and receives a list of nearby places.
      * @param lat lng
      */
-    public static List<ItemModel> getNearbyPlaces(double lat, double lng) throws ExecutionException, InterruptedException {
+    public static List<ItemModel> getNearbyPlaces(double lat, double lng, String type) throws ExecutionException, InterruptedException {
         StringBuilder stringBuilder = new StringBuilder("https://maps.googleapis.com/maps/api/place/nearbysearch/json?");
         stringBuilder.append("location=" + lat + "," + lng);
         stringBuilder.append("&radius=3500");
-        stringBuilder.append("&type=tourist_attraction");
+        stringBuilder.append("&type=" + type);
         stringBuilder.append("&key=" + BuildConfig.MAPS_API_KEY);
 
         String url = stringBuilder.toString();
@@ -81,7 +81,15 @@ public class SearchNearby {
                         double pLat = (Double) ((JSONObject) ((JSONObject) temp.get("geometry")).get("location")).get("lat");
                         double pLng = (Double) ((JSONObject) ((JSONObject) temp.get("geometry")).get("location")).get("lng");
 
-                        ItemModel attraction = new ItemModel(pId, pImage, pName, pCity, pCountry, pRating, pLat, pLng, 0);
+                        int pType;
+
+                        if(type.equals("tourist_attraction")) {
+                            pType = 0;
+                        } else {
+                            pType = 1;
+                        }
+
+                        ItemModel attraction = new ItemModel(pId, pImage, pName, pCity, pCountry, pRating, pLat, pLng, pType);
 //                        attraction.fetchAdditionalData();
 
                         items.add(attraction);
@@ -97,6 +105,10 @@ public class SearchNearby {
                 e.printStackTrace();
             }
         }
+        return null;
+    }
+
+    public static List<ItemModel> getNextPage (String nextPageToken) {
         return null;
     }
 

@@ -19,12 +19,13 @@ public class UserTrip {
 
     public UserTrip() {};
 
-    public UserTrip(HashMap<String, List<LatLng>> swipedRight, String userEmail, String dateTime, String title, String id) {
+    public UserTrip(HashMap<String, List<LatLng>> swipedRight, String userEmail, String dateTime, String title, String id, String type) {
         this.swipedRight = swipedRight;
         this.userEmail = userEmail;
         this.dateTime = dateTime;
         this.title = title;
         this.id = id;
+        this.type = type;
     }
 
     public HashMap<String, List<LatLng>> getSwipedRight() {
@@ -65,6 +66,14 @@ public class UserTrip {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 
     @Override

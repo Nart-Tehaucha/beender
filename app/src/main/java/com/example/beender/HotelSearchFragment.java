@@ -4,6 +4,7 @@ import android.graphics.Bitmap;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
+import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.DiffUtil;
@@ -84,17 +85,30 @@ public class HotelSearchFragment extends Fragment {
                 if (direction == Direction.Right){
 
                     int markerIndex = getArguments().getInt("markerIndex");
+                    int markerDay = getArguments().getInt("markerDay");
 
                     ItemModel swipedItem = adapter.getItems().get(manager.getTopPosition() - 1);
 
-                    CurrentItems.getInstance().getSwipedRight().get(0).add(markerIndex, swipedItem);
-                    CurrentItems.getInstance().setChosenHotel(swipedItem);
+                    if(getArguments().getString("parentFrag").equals("archiveMap")) {
+                        LatLng latLng = new LatLng(swipedItem.getLat(), swipedItem.getLng());
+                        CurrentItems.getInstance().getArchiveMap().get(String.valueOf(markerDay)).add(markerIndex, latLng);
+                    } else {
+                        CurrentItems.getInstance().getSwipedRight().get(markerDay).add(markerIndex, swipedItem);
+                        CurrentItems.getInstance().setChosenHotel(swipedItem);
+                    }
 
                     // If a hotel was swiped right, reset the card stack and navigate back to the map fragment
                     if(swipedItem.getType() == 1) {
                         CurrentItems.getInstance().setCurrStackHotels(new ArrayList<>());
                         updateList(new ArrayList<>());
-                        if(getArguments().getString("parentFrag").equals("map")) {
+                        if(getArguments().getString("parentFrag").equals("archiveMap")) {
+                            Bundle bundle = new Bundle();
+                            bundle.putString("parentFrag", "archive");
+                            bundle.putString("type", getArguments().getString("type"));
+                            bundle.putBoolean("archiveEdited", true);
+                            NavController navController = Navigation.findNavController(root);
+                            navController.navigate(R.id.action_hotelSearchFragment_to_navigation_map, bundle);
+                        } else if(getArguments().getString("parentFrag").equals("map")) {
                             Navigation.findNavController(root).navigate(R.id.action_hotelSearchFragment_to_navigation_map);
                         } else {
                             Navigation.findNavController(root).navigate(R.id.action_hotelSearchFragment_to_navigation_dashboard);
@@ -157,7 +171,7 @@ public class HotelSearchFragment extends Fragment {
         cardStackView.setItemAnimator(new DefaultItemAnimator());
 
         com.google.maps.model.LatLng location = new LatLng(getArguments().getDoubleArray("latlng")[0], getArguments().getDoubleArray("latlng")[1]);
-        updateList(SearchNearby.getNearbyHotels(location));
+        updateList(SearchNearby.getNearbyPlaces(location.lat, location.lng, "lodging"));
     }
 
     private List<ItemModel> addList() {

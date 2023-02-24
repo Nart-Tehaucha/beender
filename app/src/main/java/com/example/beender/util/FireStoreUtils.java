@@ -25,6 +25,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -47,7 +48,7 @@ public class FireStoreUtils {
     private static FirebaseAuth mAuth;
     private static boolean flag;
 
-    public static boolean archiveTrip() {
+    public static boolean archiveTrip(Context context) {
         flag = false;
 
         mAuth = FirebaseAuth.getInstance();
@@ -57,6 +58,8 @@ public class FireStoreUtils {
         String userEmail = currentUser.getEmail();
         String dateTime = java.time.LocalDate.now().toString();
         HashMap<Integer, ArrayList<ItemModel>> swipedRight = CurrentItems.getInstance().getSwipedRight();
+        Settings s = new Settings(context);
+        String type = s.getKindOfTrip();
 
         // Get the first destination of the trip, save its image as a thumbnail in Firebase Storage.
         ItemModel placeholder = swipedRight.get(0).get(1);
@@ -76,7 +79,7 @@ public class FireStoreUtils {
             stringHash.put(strKey, CurrentItems.getInstance().getAsLatLng(k));
         });
 
-        UserTrip userTrip = new UserTrip(stringHash, userEmail, dateTime, title, key);
+        UserTrip userTrip = new UserTrip(stringHash, userEmail, dateTime, title, key, type);
 
         FirebaseFirestore fdb = FirebaseFirestore.getInstance();
         fdb.collection("trips")
@@ -95,6 +98,26 @@ public class FireStoreUtils {
         });
 
         return flag;
+    }
+
+    public static void updateArchivedTrip () {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        DocumentReference documentReference = db.collection("trips").document(CurrentItems.getInstance().getCurrArchive().getId());
+
+        documentReference
+                .update("swipedRight", CurrentItems.getInstance().getArchiveMap())
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Log.d(TAG, "DocumentSnapshot successfully updated!");
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.w(TAG, "Error updating document", e);
+                    }
+                });
     }
 
     public static void getTrips() {

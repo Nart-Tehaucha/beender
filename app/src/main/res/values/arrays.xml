@@ -78,5 +78,6 @@
     <string-array name="marker_options_array">
         <item>Remove marker</item>
         <item>Find nearby hotel</item>
+        <item>Place details</item>
     </string-array>
 </resources>

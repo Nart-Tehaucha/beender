@@ -7,12 +7,17 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.FragmentManager;
 import androidx.navigation.NavController;
+import androidx.navigation.NavDestination;
 import androidx.navigation.Navigation;
+import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.NavigationUI;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceManager;
@@ -28,6 +33,9 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.maps.GeoApiContext;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -38,6 +46,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = DashboardFragment.class.getSimpleName();
     public static final GeoApiContext gaContext = new GeoApiContext.Builder().apiKey(BuildConfig.MAPS_API_KEY).build();
     public static int routeType; // 0 - Normal, 1 - Star
+    private NavController navController;
 
     //Get user's preferences (from 'SETTINGS' fragment)
     SharedPreferences sharedPreferences;
@@ -50,26 +59,14 @@ public class MainActivity extends AppCompatActivity {
 
         mAuth = FirebaseAuth.getInstance();
 
-        BottomNavigationView navView = findViewById(R.id.nav_view);
-        // Passing each menu ID as a set of Ids because each
-        // menu should be considered as top level destinations.
-        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
-        NavigationUI.setupWithNavController(navView, navController);
+        NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.nav_host_fragment);
+        NavController navController = navHostFragment.getNavController();
 
-        //Get user's preferences (from 'SETTINGS' fragment)
-        this.settings = new Settings(this);
+        // Bottom Menu init
+        BottomNavigationView bottomNavigationView = findViewById(R.id.nav_view);
+        NavigationUI.setupWithNavController(bottomNavigationView, navController);
 
-        Log.i("kind_of_trip: " +settings.getKindOfTrip(), "INFO");
-        Log.i("numOfPlacesPerDay: " + settings.getNumOfPlacesPerDay(), "INFO");
-        Log.i("kmRadius: " + settings.getKmRadius().toString(), "INFO");
-        Log.i("numOfDaysForTravel: " +settings.getNumOfDaysForTravel(), "INFO");
-        Log.i("hoursOfTravel: " + settings.getHoursOfTravel(), "INFO");
-        Log.i("adaptedForChildren: " +settings.getAdaptedForChildren(), "INFO");
-        Log.i("adaptedForElders: " + settings.getAdaptedForElders(), "INFO");
-        Log.i("adapteForAWheelchair: " + settings.getAdaptedForAWheelchair(), "INFO");
-        Log.i("ratingStar: " + settings.getRatingStar(), "INFO");
-        Log.i("TypeOfPlaces: " + settings.getTypeOfPlaces(), "INFO");
-        Log.i("priceLevel: " + settings.getPriceLevel(), "INFO");
     }
 
 
@@ -97,4 +94,5 @@ public class MainActivity extends AppCompatActivity {
         }
         return super.onOptionsItemSelected(item);
     }
+
 }

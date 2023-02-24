@@ -1,6 +1,7 @@
 package com.example.beender;
 
 import android.app.AlertDialog;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
@@ -11,6 +12,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.navigation.NavController;
+import androidx.navigation.NavDeepLinkBuilder;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -103,9 +106,12 @@ public class TravelMapsAdapter extends RecyclerView.Adapter<TravelMapsAdapter.Tr
 
     public void loadToMap(UserTrip t, View view) {
         CurrentItems.getInstance().setArchiveMap(t.getSwipedRight());
+        CurrentItems.getInstance().setCurrArchive(t);
         Bundle bundle = new Bundle();
         bundle.putString("parentFrag", "archive");
-        Navigation.findNavController(view).navigate(R.id.action_navigation_archive_to_navigation_map, bundle);
+        bundle.putString("type", t.getType());
+        NavController navController = Navigation.findNavController(view);
+        navController.navigate(R.id.action_navigation_archive_to_navigation_map, bundle);
     }
 
     //This function remove open a dialog box that asks the user if he sure that

@@ -10,6 +10,9 @@ import android.location.Location;
 import android.opengl.Visibility;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.SystemClock;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
@@ -20,6 +23,7 @@ import android.view.animation.LinearInterpolator;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -93,6 +97,8 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class DashboardFragment extends Fragment {
 
@@ -188,6 +194,7 @@ public class DashboardFragment extends Fragment {
 
                     // If the trip type is "Journey" OR if we reached the final day, navigate to the map fragment and display the routes.
                     else {
+
                         Navigation.findNavController(view).navigate(R.id.action_navigation_dashboard_to_navigation_map);
                     }
                 }
@@ -228,12 +235,13 @@ public class DashboardFragment extends Fragment {
                 double lat = place.getLatLng().latitude;
                 double lng = place.getLatLng().longitude;
                 try {
-                    updateList(SearchNearby.getNearbyPlaces(lat,lng));
+                    updateList(SearchNearby.getNearbyPlaces(lat, lng, "tourist_attraction"));
                 } catch (ExecutionException e) {
                     e.printStackTrace();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
+
 
                 //If the trip type is a star, we first asל the user to choose a hotel.
                 if(sharedPreferences.getString("kind_of_trip", "").equals("Star")) {
@@ -278,6 +286,7 @@ public class DashboardFragment extends Fragment {
         CardStackView cardStackView = root.findViewById(R.id.card_stack_view);
 
         manager = new CardStackLayoutManager(getContext(), new CardStackListener() {
+
             @Override
             public void onCardDragging(Direction direction, float ratio) {
                 //Log.d(TAG, "onCardDragging: d=" + direction.name() + " ratio=" + ratio);
@@ -368,7 +377,8 @@ public class DashboardFragment extends Fragment {
             @Override
             public boolean onInterceptTouchEvent(@NonNull RecyclerView rv, @NonNull MotionEvent e) {
                 if (mGestureDetector.onTouchEvent(e) && adapter != null && adapter.getItemCount() > 0) {
-                    ItemModel swipedItem = adapter.getItems().get(manager.getTopPosition());
+                    Log.d(TAG, "onCardClicked: p=" + manager.getTopPosition());
+                    ItemModel swipedItem = adapter.getItems().get(0);
 
                     Bundle bundle = new Bundle();
                     bundle.putSerializable("attraction", swipedItem);
@@ -435,8 +445,7 @@ public class DashboardFragment extends Fragment {
                             lastKnownLocation = task.getResult();
                             if (lastKnownLocation != null) {
                                 try {
-                                    updateList(SearchNearby.getNearbyPlaces(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude()));
-                                    ;
+                                    updateList(SearchNearby.getNearbyPlaces(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude(), "tourist_attraction"));
                                 } catch (ExecutionException e) {
                                     e.printStackTrace();
                                 } catch (InterruptedException e) {

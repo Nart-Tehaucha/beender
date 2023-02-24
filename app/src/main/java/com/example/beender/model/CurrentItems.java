@@ -1,5 +1,6 @@
 package com.example.beender.model;
 
+import com.google.firebase.firestore.auth.User;
 import com.google.maps.model.LatLng;
 
 import java.util.ArrayList;
@@ -14,7 +15,9 @@ public class CurrentItems {
 
     private HashMap<Integer, ArrayList<ItemModel>> currStack;
     private HashMap<Integer, ArrayList<ItemModel>> swipedRight;
-    HashMap<String, List<LatLng>> archiveMap;
+    private HashMap<String, List<LatLng>> archiveMap;
+    private UserTrip currArchive;
+
     private ItemModel chosenHotel;
     private ArrayList<ItemModel> currStackHotels;
     private int currDay;
@@ -83,6 +86,14 @@ public class CurrentItems {
 
     public void setArchiveMap(HashMap<String, List<LatLng>> archiveMap) {
         this.archiveMap = archiveMap;
+    }
+
+    public UserTrip getCurrArchive() {
+        return currArchive;
+    }
+
+    public void setCurrArchive(UserTrip currArchive) {
+        this.currArchive = currArchive;
     }
 
     public List<LatLng> getAsLatLng (int day) {

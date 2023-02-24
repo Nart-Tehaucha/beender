@@ -10,8 +10,12 @@ import android.graphics.Point;
 import android.os.Build;
 import android.os.Bundle;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
+import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.preference.PreferenceManager;
 
@@ -64,7 +68,9 @@ public class MapFragment extends Fragment implements AdapterView.OnItemSelectedL
     private GoogleMap mMap;
     private Spinner spinner;
     private FloatingActionButton btnArchive;
+    private FloatingActionButton btnSaveArchive;
     private String parentFrag;
+    private boolean tripIsArchived;
 
 
     List<com.google.maps.model.LatLng> swipedRight;
@@ -76,11 +82,55 @@ public class MapFragment extends Fragment implements AdapterView.OnItemSelectedL
     HashMap<Integer, ArrayList<Marker>> currentMarkers;
     HashMap<Integer, ArrayList<Polyline>> currentPolylines;
 
+    FragmentManager fm;
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+//        // This callback will only be called when MyFragment is at least Started.
+//        OnBackPressedCallback callback = new OnBackPressedCallback(true /* enabled by default */) {
+//            @Override
+//            public void handleOnBackPressed() {
+//                // Handle the back button event
+//                Log.d(TAG, "EXITED MAP");
+//            }
+//        };
+//        requireActivity().getOnBackPressedDispatcher().addCallback(this, callback);
+//
+//        // The callback can be enabled or disabled here or in handleOnBackPressed()
+
+//        fm = getParentFragmentManager();
+//
+//        fm.addOnBackStackChangedListener(new FragmentManager.OnBackStackChangedListener() {
+//            @Override
+//            public void onBackStackChanged() {
+////                if(fm.getBackStackEntryCount() == 0) {
+////                    Log.d(TAG, "CLOSED MAP FRAG!");
+////                    CurrentItems.getInstance().reset();
+////                    fm.popBackStack();
+////                }
+//
+//                int backStackEntryCount = fm.getBackStackEntryCount();
+//
+//                if (backStackEntryCount > 0) {
+//                    FragmentManager.BackStackEntry backStackEntry = fm.getBackStackEntryAt(backStackEntryCount - 1);
+//
+//                    if (backStackEntry.getName().equals("MapFragment")) {
+//                        // MapFragment has been closed
+//                        // Do your handling here
+//                        Log.d(TAG, "FRAGMENT MAP CLOSED");
+//                    }
+//                }
+//            }
+//        });
+    }
+
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        if(getArguments().containsKey("parentFrag")) {
+        if(getArguments() != null && getArguments().containsKey("parentFrag")) {
             parentFrag = getArguments().getString("parentFrag");
         } else {
             parentFrag = "map";
@@ -110,7 +160,24 @@ public class MapFragment extends Fragment implements AdapterView.OnItemSelectedL
         spinner = (Spinner) view.findViewById(R.id.daysSpinner);
 
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        if(sharedPreferences.getString("kind_of_trip", "").equals("Star")) {
+
+        if(parentFrag.equals("archive")) {
+            if(getArguments().getString("type").equals("Star")) {
+                ArrayList<String> spinnerDays = new ArrayList<>();
+                spinnerDays.add("Show All");
+                for(int i = 0 ; i < CurrentItems.getInstance().getArchiveMap().size(); i++) {
+                    spinnerDays.add("Day " + (i+1));
+                }
+
+                // Create an ArrayAdapter using the string array and a default spinner layout
+                ArrayAdapter adapter = new ArrayAdapter(getContext(), android.R.layout.simple_spinner_item, spinnerDays);
+                // Specify the layout to use when the list of choices appears
+                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                // Apply the adapter to the spinner
+                spinner.setAdapter(adapter);
+                spinner.setOnItemSelectedListener(this);
+            }
+        } else if(!parentFrag.equals("archive") && sharedPreferences.getString("kind_of_trip", "").equals("Star")) {
             ArrayList<String> spinnerDays = new ArrayList<>();
             spinnerDays.add("Show All");
             if(CurrentItems.getInstance().getCurrDay() > 0) {
@@ -131,27 +198,94 @@ public class MapFragment extends Fragment implements AdapterView.OnItemSelectedL
             spinner.setVisibility(View.GONE);
         }
 
+        // FloatingActionButton setup
         btnArchive = view.findViewById(R.id.btnArchive);
-        if(getArguments() != null && getArguments().containsKey("parentFrag") && getArguments().getString("parentFrag").equals("archive")) {
-            btnArchive.setImageResource(R.drawable.ic_baseline_keyboard_tab_24);
-            btnArchive.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    getArguments().putString("parentFrag", "map");
-                    prepareMap(view);
-                }
-
-            });
+        if(getArguments() != null && getArguments().containsKey("archiveEdited") && getArguments().getBoolean("archiveEdited")) {
+            btnArchive.setVisibility(View.GONE);
+            setupArchiveSaveButton(view);
         } else {
-            btnArchive.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    FireStoreUtils.archiveTrip();
-                }
+            if(CurrentItems.getInstance().getSwipedRight().get(0).isEmpty()) {
+                btnArchive.setVisibility(View.GONE);
+            } else if(getArguments() != null && getArguments().containsKey("parentFrag") && getArguments().getString("parentFrag").equals("archive")) {
+                btnArchive.setImageResource(R.drawable.ic_baseline_keyboard_tab_24);
+                btnArchive.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                        builder.setMessage("Return to current trip?")
+                                .setPositiveButton(R.string.alertOk, new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+                                        mMap.clear();
+                                        parentFrag = "map";
+                                        prepareMap(view);
 
-            });
+                                        btnArchive.setImageResource(R.drawable.ic_baseline_archive_24);
+                                        btnArchive.setOnClickListener(new View.OnClickListener() {
+                                            @Override
+                                            public void onClick(View view) {
+                                                if(FireStoreUtils.archiveTrip(getContext())) {
+                                                    CurrentItems.getInstance().reset();
+                                                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                                                    builder.setMessage("Go to Archives?")
+                                                            .setPositiveButton(R.string.alertOk, new DialogInterface.OnClickListener() {
+                                                                public void onClick(DialogInterface dialog, int id) {
+                                                                    mMap.clear();
+                                                                    NavController navController = Navigation.findNavController(view);
+                                                                    navController.navigateUp();
+                                                                    navController.navigate(R.id.action_navigation_map_to_navigation_archive);
+                                                                }
+                                                            })
+                                                            .setNegativeButton(R.string.alertCancel, new DialogInterface.OnClickListener() {
+                                                                public void onClick(DialogInterface dialog, int id) {
+                                                                    // User cancelled the dialog
+                                                                    dialog.cancel();
+                                                                }
+                                                            });
+                                                    AlertDialog dialog = builder.create();
+                                                    dialog.show();
+                                                }
+                                            }
+                                        });
+                                    }
+                                })
+                                .setNegativeButton(R.string.alertCancel, new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+                                        // User cancelled the dialog
+                                        dialog.cancel();
+                                    }
+                                });
+                        AlertDialog dialog = builder.create();
+                        dialog.show();
+                    }
+                });
+            } else {
+                btnArchive.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        if(FireStoreUtils.archiveTrip(getContext())) {
+                            CurrentItems.getInstance().reset();
+                            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                            builder.setMessage("Go to Archives?")
+                                    .setPositiveButton(R.string.alertOk, new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog, int id) {
+                                            mMap.clear();
+                                            Navigation.findNavController(view).navigate(R.id.action_navigation_map_to_navigation_archive);
+                                        }
+                                    })
+                                    .setNegativeButton(R.string.alertCancel, new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog, int id) {
+                                            // User cancelled the dialog
+                                            dialog.cancel();
+                                        }
+                                    });
+                            AlertDialog dialog = builder.create();
+                            dialog.show();
+                        }
+                    }
+
+                });
+            }
         }
-
 
         // Return view
         return view;
@@ -267,36 +401,73 @@ public class MapFragment extends Fragment implements AdapterView.OnItemSelectedL
                                 int[] markerInfo = (int[]) marker.getTag();
                                 int markerIndex = markerInfo[1];
                                 int markerDay = markerInfo[0];
-                                switch(which) {
-                                    case 0:
-                                        //Get user's preferences (from 'SETTINGS' fragment)
-                                        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
-                                        if(sharedPreferences.getString("kind_of_trip", "").equals("Star") && markerIndex == 0) {
-                                            Toast.makeText(getContext(), "You can't remove the starting hotel!", Toast.LENGTH_SHORT).show();
+
+                                if(parentFrag.equals("archive")) {
+                                    switch(which) {
+                                        case 0:
+                                            if(getArguments() != null && getArguments().containsKey("type") && getArguments().getString("type").equals("Star") && markerIndex == 0) {
+                                                Toast.makeText(getContext(), "You can't remove the starting hotel!", Toast.LENGTH_SHORT).show();
+                                                break;
+                                            }
+
+                                            setupArchiveSaveButton(view);
+                                            CurrentItems.getInstance().getArchiveMap().get(String.valueOf(markerDay)).remove(markerIndex);
+
+                                            mMap.clear();
+                                            prepareMap(view);
                                             break;
-                                        }
+                                        case 1:
+                                            com.google.maps.model.LatLng hotelLatLng = new com.google.maps.model.LatLng(CurrentItems.getInstance().getArchiveMap().get(String.valueOf(markerDay)).get(markerIndex).lat, CurrentItems.getInstance().getArchiveMap().get(String.valueOf(markerDay)).get(markerIndex).lng);
+                                            Bundle bundle = new Bundle();
+                                            bundle.putDoubleArray("latlng", new double[]{hotelLatLng.lat, hotelLatLng.lng});
+                                            bundle.putInt("markerIndex", markerIndex);
+                                            bundle.putInt("markerDay", markerDay);
+                                            bundle.putString("type", getArguments().getString("type"));
+                                            bundle.putString("parentFrag", "archiveMap");
+                                            Navigation.findNavController(view).navigate(R.id.action_navigation_map_to_hotelSearchFragment, bundle);
+                                            break;
+                                    }
 
-                                        CurrentItems.getInstance().getSwipedRight().get(markerDay).remove(markerIndex);
 
-                                        Log.d(TAG, "REMOVING MARKER: " + markerIndex + " FROM DAY: " + markerInfo[1]);
-                                        Log.d(TAG, "SUPPOSED DAY: " + day);
 
-                                        Log.d(TAG, "================= AFTER =================");
-                                        for(int i=0;i<CurrentItems.getInstance().getCurrDay()+1;i++) {
-                                            Log.d(TAG, "DAY " + i + " " + CurrentItems.getInstance().getSwipedRight().get(i).toString());
-                                        }
-                                        Log.d(TAG, "================= ===== =================");
-                                        mMap.clear();
-                                        prepareMap(view);
-                                        break;
-                                    case 1:
-                                        com.google.maps.model.LatLng hotelLatLng = new com.google.maps.model.LatLng(CurrentItems.getInstance().getSwipedRight().get(day).get(markerIndex).getLat(), CurrentItems.getInstance().getSwipedRight().get(day).get(markerIndex).getLng());
-                                        Bundle bundle = new Bundle();
-                                        bundle.putDoubleArray("latlng", new double[]{hotelLatLng.lat, hotelLatLng.lng});
-                                        bundle.putInt("markerIndex", markerIndex);
-                                        bundle.putString("parentFrag", "map");
-                                        Navigation.findNavController(view).navigate(R.id.action_navigation_map_to_hotelSearchFragment, bundle);
-                                        break;
+                                } else {
+                                    switch(which) {
+                                        case 0:
+                                            //Get user's preferences (from 'SETTINGS' fragment)
+                                            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+                                            if(sharedPreferences.getString("kind_of_trip", "").equals("Star") && markerIndex == 0) {
+                                                Toast.makeText(getContext(), "You can't remove the starting hotel!", Toast.LENGTH_SHORT).show();
+                                                break;
+                                            }
+
+                                            CurrentItems.getInstance().getSwipedRight().get(markerDay).remove(markerIndex);
+
+                                            Log.d(TAG, "REMOVING MARKER: " + markerIndex + " FROM DAY: " + markerInfo[1]);
+                                            Log.d(TAG, "SUPPOSED DAY: " + day);
+
+                                            Log.d(TAG, "================= AFTER =================");
+                                            for(int i=0;i<CurrentItems.getInstance().getCurrDay()+1;i++) {
+                                                Log.d(TAG, "DAY " + i + " " + CurrentItems.getInstance().getSwipedRight().get(i).toString());
+                                            }
+                                            Log.d(TAG, "================= ===== =================");
+                                            mMap.clear();
+                                            prepareMap(view);
+                                            break;
+                                        case 1:
+                                            com.google.maps.model.LatLng hotelLatLng = new com.google.maps.model.LatLng(CurrentItems.getInstance().getSwipedRight().get(markerDay).get(markerIndex).getLat(), CurrentItems.getInstance().getSwipedRight().get(markerDay).get(markerIndex).getLng());
+                                            Bundle bundle = new Bundle();
+                                            bundle.putDoubleArray("latlng", new double[]{hotelLatLng.lat, hotelLatLng.lng});
+                                            bundle.putInt("markerIndex", markerIndex);
+                                            bundle.putInt("markerDay", markerDay);
+                                            bundle.putString("parentFrag", "map");
+                                            Navigation.findNavController(view).navigate(R.id.action_navigation_map_to_hotelSearchFragment, bundle);
+                                            break;
+                                        case 2:
+                                            ItemModel t = CurrentItems.getInstance().getSwipedRight().get(markerDay).get(markerIndex);
+                                            Bundle bundle2 = new Bundle();
+                                            bundle2.putSerializable("attraction", t);
+                                            Navigation.findNavController(view).navigate(R.id.action_navigation_map_to_attractionPageFragment, bundle2);
+                                    }
                                 }
                             }
                         });
@@ -364,6 +535,33 @@ public class MapFragment extends Fragment implements AdapterView.OnItemSelectedL
                 }
             });
         }
+    }
+
+    private void setupArchiveSaveButton (View view) {
+        // After doing any edits to the archive map, transform the FloatingActionButton to a Save button. OnClick it updates the Archived map in Firestore.
+        btnSaveArchive = view.findViewById(R.id.btnSaveArchive);
+        btnSaveArchive.setVisibility(View.VISIBLE);
+        btnSaveArchive.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                builder.setMessage("Save Archive Edits?")
+                        .setPositiveButton(R.string.alertOk, new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                FireStoreUtils.updateArchivedTrip();
+                            }
+                        })
+                        .setNegativeButton(R.string.alertCancel, new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                // User cancelled the dialog
+                                dialog.cancel();
+                            }
+                        });
+                AlertDialog dialog = builder.create();
+                dialog.show();
+            }
+
+        });
     }
 
     @Override
