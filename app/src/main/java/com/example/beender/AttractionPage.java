@@ -197,36 +197,65 @@ public class AttractionPage extends Fragment {
         ImageView mainImage = (ImageView)parent.findViewById(R.id.main_image);
         mainImage.setImageBitmap(images.get(currentPosition));
 
-        //TODO: This duplicate code is ugly, better to create an array for all the thumbails and do this in a loop. But I'm feeling pretty lazy now.
-        final int nextPosition1 = (currentPosition + 1) % images.size();
-        ImageView thumbnail1 = (ImageView)parent.findViewById(R.id.thumbnail_1);
-        thumbnail1.setImageBitmap(images.get(nextPosition1));
-        thumbnail1.setOnClickListener(new View.OnClickListener() {
+        LinearLayout thumbnailLayout = parent.findViewById(R.id.thumbnail_layout);
+        int width = getResources().getDisplayMetrics().widthPixels / 3; // get 1/3rd of the screen width
+        int height = (int) (width * 0.5); // set the height proportional to the width
+
+        int padding = 4; // in dp
+        float scale = getResources().getDisplayMetrics().density;
+        int pixelPadding = (int) (padding * scale + 0.5f);
+
+        for (int i = 0; i < images.size(); i++) {
+            Bitmap image = images.get(i);
+            ImageView imageView = new ImageView(getContext());
+            imageView.setLayoutParams(new LinearLayout.LayoutParams(width, height));
+            imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+            imageView.setPadding(pixelPadding, 0, pixelPadding, 0);
+            imageView.setImageBitmap(image);
+
+
+            int finalI = i;
+            imageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                setAllImagesByCurrentPosition(parent, images, nextPosition1);
+                setAllImagesByCurrentPosition(parent, images, finalI);
             }
         });
 
-        final int nextPosition2 = (currentPosition + 2) % images.size();
-        ImageView thumbnail2 = (ImageView)parent.findViewById(R.id.thumbnail_2);
-        thumbnail2.setImageBitmap(images.get(nextPosition2));
-        thumbnail2.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                setAllImagesByCurrentPosition(parent, images, nextPosition2);
-            }
-        });
+            thumbnailLayout.addView(imageView);
+        }
 
-        final int nextPosition3 = (currentPosition + 3) % images.size();
-        ImageView thumbnail3 = (ImageView)parent.findViewById(R.id.thumbnail_3);
-        thumbnail3.setImageBitmap(images.get(nextPosition3));
-        thumbnail3.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                setAllImagesByCurrentPosition(parent, images, nextPosition3);
-            }
-        });
+
+//        //TODO: This duplicate code is ugly, better to create an array for all the thumbails and do this in a loop. But I'm feeling pretty lazy now.
+//        final int nextPosition1 = (currentPosition + 1) % images.size();
+//        ImageView thumbnail1 = (ImageView)parent.findViewById(R.id.thumbnail_1);
+//        thumbnail1.setImageBitmap(images.get(nextPosition1));
+//        thumbnail1.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                setAllImagesByCurrentPosition(parent, images, nextPosition1);
+//            }
+//        });
+//
+//        final int nextPosition2 = (currentPosition + 2) % images.size();
+//        ImageView thumbnail2 = (ImageView)parent.findViewById(R.id.thumbnail_2);
+//        thumbnail2.setImageBitmap(images.get(nextPosition2));
+//        thumbnail2.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                setAllImagesByCurrentPosition(parent, images, nextPosition2);
+//            }
+//        });
+//
+//        final int nextPosition3 = (currentPosition + 3) % images.size();
+//        ImageView thumbnail3 = (ImageView)parent.findViewById(R.id.thumbnail_3);
+//        thumbnail3.setImageBitmap(images.get(nextPosition3));
+//        thumbnail3.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                setAllImagesByCurrentPosition(parent, images, nextPosition3);
+//            }
+//        });
 
     }
 

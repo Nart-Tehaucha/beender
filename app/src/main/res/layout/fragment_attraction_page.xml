@@ -18,66 +18,74 @@
         >
 
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:id="@+id/reviews_layout"
-            android:gravity="center_horizontal"
-            >
-
-            <RelativeLayout
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/images_layout"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:id="@+id/reviews_layout"
+                android:gravity="center_horizontal"
                 >
 
-                <!-- ImageView for the main image -->
-                <ImageView
-                    android:id="@+id/main_image"
+                <RelativeLayout
                     android:layout_width="match_parent"
-                    android:layout_height="250dp"
-                    android:scaleType="centerCrop"
-                    android:src="@drawable/sample1" />
+                    android:layout_height="wrap_content"
+                    android:id="@+id/images_layout"
+                    >
 
-                <!-- LinearLayout with the thumbnail images -->
-                <LinearLayout
-                    android:id="@+id/thumbnail_layout"
-                    android:layout_width="match_parent"
-                    android:layout_height="80dp"
-                    android:orientation="horizontal"
-                    android:layout_below="@id/main_image"
-                    android:padding="8dp">
-
-                    <!-- Thumbnail images -->
+                    <!-- ImageView for the main image -->
                     <ImageView
-                        android:id="@+id/thumbnail_1"
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1"
+                        android:id="@+id/main_image"
+                        android:layout_width="match_parent"
+                        android:layout_height="250dp"
                         android:scaleType="centerCrop"
-                        android:paddingHorizontal="4dp"
-                        android:src="@drawable/sample2" />
+                        android:src="@drawable/sample1" />
 
-                    <ImageView
-                        android:id="@+id/thumbnail_2"
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1"
-                        android:scaleType="centerCrop"
-                        android:paddingHorizontal="4dp"
-                        android:src="@drawable/sample3" />
+                    <HorizontalScrollView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@id/main_image"
+                        android:scrollbarSize="0dp">
 
-                    <ImageView
-                        android:id="@+id/thumbnail_3"
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1"
-                        android:scaleType="centerCrop"
-                        android:paddingHorizontal="4dp"
-                        android:src="@drawable/sample4" />
 
-                </LinearLayout>
+                    <!-- LinearLayout with the thumbnail images -->
+                    <LinearLayout
+                        android:id="@+id/thumbnail_layout"
+                        android:layout_width="match_parent"
+                        android:layout_height="80dp"
+                        android:orientation="horizontal"
+
+                        android:padding="8dp">
+
+<!--                        &lt;!&ndash; Thumbnail images &ndash;&gt;-->
+<!--                        <ImageView-->
+<!--                            android:id="@+id/thumbnail_1"-->
+<!--                            android:layout_width="130dp"-->
+<!--                            android:layout_height="match_parent"-->
+<!--                            android:layout_weight="1"-->
+<!--                            android:scaleType="centerCrop"-->
+<!--                            android:paddingHorizontal="4dp"-->
+<!--                            android:src="@drawable/sample2" />-->
+
+<!--                        <ImageView-->
+<!--                            android:id="@+id/thumbnail_2"-->
+<!--                            android:layout_width="130dp"-->
+<!--                            android:layout_height="match_parent"-->
+<!--                            android:layout_weight="1"-->
+<!--                            android:scaleType="centerCrop"-->
+<!--                            android:paddingHorizontal="4dp"-->
+<!--                            android:src="@drawable/sample3" />-->
+
+<!--                        <ImageView-->
+<!--                            android:id="@+id/thumbnail_3"-->
+<!--                            android:layout_width="130dp"-->
+<!--                            android:layout_height="match_parent"-->
+<!--                            android:layout_weight="1"-->
+<!--                            android:scaleType="centerCrop"-->
+<!--                            android:paddingHorizontal="4dp"-->
+<!--                            android:src="@drawable/sample4" />-->
+
+                    </LinearLayout>
+                </HorizontalScrollView>
 
                 <!-- The rest of the layout goes here -->
 
