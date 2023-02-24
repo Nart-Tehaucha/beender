@@ -24,6 +24,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -95,6 +96,8 @@ public class AttractionPage extends Fragment {
         });
 
         initializeViews(view);
+
+        ((MainActivity)getActivity()).getLoadingDialog().dismiss();
 
     }
 
@@ -235,11 +238,13 @@ public class AttractionPage extends Fragment {
     private void addSingleThumbail(View parent,  LinearLayout thumbnailLayout, int width, int height, int pixelPadding, List<Bitmap> images, final int index) {
         boolean isRealImage = index >= 0;
 
-        ImageView imageView = new ImageView(getContext());
-        imageView.setLayoutParams(new LinearLayout.LayoutParams(width, height));
-        imageView.setPadding(pixelPadding, 0, pixelPadding, 0);
+
 
         if (isRealImage) {
+            ImageView imageView = new ImageView(getContext());
+            imageView.setLayoutParams(new LinearLayout.LayoutParams(width, height));
+            imageView.setPadding(pixelPadding, 0, pixelPadding, 0);
+
             imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
             Bitmap image = images.get(index);
             imageView.setImageBitmap(image);
@@ -250,22 +255,30 @@ public class AttractionPage extends Fragment {
                     setMainImage(parent, images, index);
                 }
             });
+
+            thumbnailLayout.addView(imageView);
+
         } else {
-            imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
-            Bitmap image = BitmapFactory.decodeResource(getResources(), R.drawable.loading);
+            ProgressBar progressBar = new ProgressBar(getContext());
+            progressBar.setLayoutParams(new LinearLayout.LayoutParams(width, height));
+            progressBar.setPadding(pixelPadding, 0, pixelPadding, 0);
+//            imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
+//            Bitmap image = BitmapFactory.decodeResource(getResources(), R.drawable.loading);
+//
+//            int color = getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
+//            if (color == Configuration.UI_MODE_NIGHT_YES) {
+//                imageView.setColorFilter(Color.WHITE);
+//            } else {
+//                imageView.setColorFilter(Color.BLACK);
+//            }
+//
+//            imageView.setImageBitmap(image);
 
-            int color = getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
-            if (color == Configuration.UI_MODE_NIGHT_YES) {
-                imageView.setColorFilter(Color.WHITE);
-            } else {
-                imageView.setColorFilter(Color.BLACK);
-            }
+            thumbnailLayout.addView(progressBar);
 
-            imageView.setImageBitmap(image);
 
         }
 
-        thumbnailLayout.addView(imageView);
     }
 
     private void initializeViews(View parent) {

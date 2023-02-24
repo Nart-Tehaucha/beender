@@ -1,5 +1,6 @@
 package com.example.beender;
 
+import android.app.Dialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -43,8 +44,15 @@ public class MainActivity extends AppCompatActivity {
     SharedPreferences sharedPreferences;
     private Settings settings;
 
+    private Dialog loadingDialog;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        loadingDialog = new Dialog(this, android.R.style.Widget);
+        loadingDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        loadingDialog.setContentView(R.layout.loading_dialog);
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -70,9 +78,14 @@ public class MainActivity extends AppCompatActivity {
         Log.i("ratingStar: " + settings.getRatingStar(), "INFO");
         Log.i("TypeOfPlaces: " + settings.getTypeOfPlaces(), "INFO");
         Log.i("priceLevel: " + settings.getPriceLevel(), "INFO");
+
+
     }
 
 
+    public Dialog getLoadingDialog() {
+        return loadingDialog;
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
