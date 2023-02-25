@@ -22,6 +22,8 @@ public class CurrentItems {
     private ArrayList<ItemModel> currStackHotels;
     private int currDay;
 
+    private String nextPageToken;
+
     // Constructor
     // Here we will be creating private constructor
     // restricted to this class itself
@@ -96,6 +98,15 @@ public class CurrentItems {
         this.currArchive = currArchive;
     }
 
+    public String getNextPageToken() {
+        return nextPageToken;
+    }
+
+    public void setNextPageToken(String nextPageToken) {
+        this.nextPageToken = nextPageToken;
+    }
+
+    // METHODS
     public List<LatLng> getAsLatLng (int day) {
         if(swipedRight != null) {
             List<LatLng> list = new ArrayList<>();

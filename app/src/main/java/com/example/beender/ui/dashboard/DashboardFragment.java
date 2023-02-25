@@ -343,7 +343,13 @@ public class DashboardFragment extends Fragment {
 
                 // Paginating
                 if (manager.getTopPosition() == adapter.getItemCount() - 5){
-//                    paginate();
+                    try {
+                        paginate();
+                    } catch (ExecutionException e) {
+                        e.printStackTrace();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
                 }
 
             }
@@ -438,15 +444,20 @@ public class DashboardFragment extends Fragment {
         });
     }
 
-//    private void paginate() {
-//        List<ItemModel> oldList = adapter.getItems();
-//        List<ItemModel> newList = new ArrayList<>(addList());
-//        CardStackCallback callback = new CardStackCallback(oldList, newList);
-//        DiffUtil.DiffResult results = DiffUtil.calculateDiff(callback);
-//        adapter.setItems(newList);
-//        results.dispatchUpdatesTo(adapter);
-//    }
-//
+    private void paginate() throws ExecutionException, InterruptedException {
+        if(CurrentItems.getInstance().getNextPageToken() == null) {
+            return;
+        }
+        List<ItemModel> oldList = adapter.getItems();
+        List<ItemModel> newList = new ArrayList<>();
+        newList.addAll(oldList);
+        newList.addAll(SearchNearby.getNextPage(CurrentItems.getInstance().getNextPageToken()));
+        CardStackCallback callback = new CardStackCallback(oldList, newList);
+        DiffUtil.DiffResult results = DiffUtil.calculateDiff(callback);
+        adapter.setItems(newList);
+        results.dispatchUpdatesTo(adapter);
+        Log.d(TAG, "PAGINATE ACTIVATED");
+    }
     private List<ItemModel> addList() {
         if(CurrentItems.getInstance().getCurrStack().containsKey(0)) {
             return (List<ItemModel>) CurrentItems.getInstance().getCurrStack().get(0).clone();

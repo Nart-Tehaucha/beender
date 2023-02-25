@@ -62,6 +62,12 @@ public class SearchNearby {
                 Log.d(TAG, "ARR - " + jarr.toString());
                 Log.d(TAG, "ARR - " + jarr.get(0).toString());
 
+                // Store next page token in CurrentItems for pagination.
+                if(jobj.has("next_page_token")) {
+                    String nextPageToken = jobj.getString("next_page_token");
+                    CurrentItems.getInstance().setNextPageToken(nextPageToken);
+                }
+
                 int imagesToLoadFirst = 3;
 
                 // Create a list of ItemModel that contains all info of each Place we generated
@@ -129,7 +135,95 @@ public class SearchNearby {
         return null;
     }
 
-    public static List<ItemModel> getNextPage (String nextPageToken) {
+    public static List<ItemModel> getNextPage (String pageToken) throws ExecutionException, InterruptedException {
+        StringBuilder stringBuilder = new StringBuilder("https://maps.googleapis.com/maps/api/place/nearbysearch/json?");
+        stringBuilder.append("pagetoken=" + pageToken);
+        stringBuilder.append("&key=" + BuildConfig.MAPS_API_KEY);
+
+        String url = stringBuilder.toString();
+        Object dataFetch[] = new Object[2];
+        dataFetch[0] = null;
+        dataFetch[1] = url;
+
+        FetchData fetchData = new FetchData();
+        fetchData.execute(dataFetch);
+
+        String taskResult = "";
+        String photoReference = "";
+        taskResult = fetchData.get();
+
+        if(fetchData.getStatus() != AsyncTask.Status.PENDING) {
+            try {
+                Log.d(TAG, "INSIDE IF");
+                JSONObject jobj = new JSONObject(taskResult);
+                JSONArray jarr = jobj.getJSONArray("results");
+                Log.d(TAG, "OBJ - " + jobj.toString());
+                Log.d(TAG, "ARR - " + jarr.toString());
+                Log.d(TAG, "ARR - " + jarr.get(0).toString());
+
+                // Store next page token in CurrentItems for pagination.
+                if(jobj.has("next_page_token")) {
+                    String nextPageToken = jobj.getString("next_page_token");
+                    CurrentItems.getInstance().setNextPageToken(nextPageToken);
+                }
+
+                int imagesToLoadFirst = 3;
+
+                // Create a list of ItemModel that contains all info of each Place we generated
+                List<ItemModel> items = new ArrayList<>();
+                for (int i=0; i < jarr.length(); i++) {
+                    Log.d(TAG, "Item NUMBER " + i + "- " + jarr.get(i).toString());
+                    if(((JSONObject) jarr.get(i)).has("photos")) {
+                        JSONObject temp = jarr.getJSONObject(i);
+                        String pName = temp.get("name").toString();
+                        String pCity = temp.get("vicinity").toString();
+                        String pCountry = temp.get("vicinity").toString();
+                        String pRating = "No Rating";
+                        String pId = temp.get("place_id").toString();
+                        if(temp.has("rating")) {
+                            pRating = temp.get("rating").toString();
+                        }
+                        double pLat = (Double) ((JSONObject) ((JSONObject) temp.get("geometry")).get("location")).get("lat");
+                        double pLng = (Double) ((JSONObject) ((JSONObject) temp.get("geometry")).get("location")).get("lng");
+
+
+                        ItemModel attraction = new ItemModel(pId, null, pName, pCity, pCountry, pRating, pLat, pLng, 0);
+
+                        if (i < imagesToLoadFirst) {
+                            Bitmap pImage = getPlacePhoto(((JSONObject) ((JSONArray) ((JSONObject) jarr.get(i)).get("photos")).get(0)).get("photo_reference").toString());
+                            attraction.setImage(pImage);
+
+                        } else {
+                            int finalI = i;
+                            new Thread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Bitmap pImage = null;
+                                    try {
+                                        pImage = getPlacePhoto(((JSONObject) ((JSONArray) ((JSONObject) jarr.get(finalI)).get("photos")).get(0)).get("photo_reference").toString());
+                                    } catch (IOException | ExecutionException | InterruptedException |
+                                            JSONException e) {
+                                        e.printStackTrace();
+                                    }
+                                    attraction.setImage(pImage);
+                                }
+                            }).start();
+                        }
+
+                        items.add(attraction);
+
+                    }
+                }
+
+                // Update the singleton CurrentItems to contain our generated list of places
+                //CurrentItems.getInstance().getCurrStack().put(0, new ArrayList<>(items));
+                CurrentItems.getInstance().getCurrStack().get(0).addAll(new ArrayList<>(items));
+                return items;
+
+            } catch (JSONException | IOException e) {
+                e.printStackTrace();
+            }
+        }
         return null;
     }
 
@@ -191,7 +285,5 @@ public class SearchNearby {
         fetchImage.execute(url);
 
         return fetchImage.get();
-
-        //testIV.setImageBitmap(fetchImage.get());
     }
 }
