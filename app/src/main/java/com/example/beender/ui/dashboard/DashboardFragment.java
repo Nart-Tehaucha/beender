@@ -243,7 +243,7 @@ public class DashboardFragment extends Fragment {
                         double lng = place.getLatLng().longitude;
                         List<ItemModel> nearbyPlaces = null;
                         try {
-                            nearbyPlaces = SearchNearby.getNearbyPlaces(lat, lng);
+                            nearbyPlaces = SearchNearby.getNearbyPlaces(lat, lng, "tourist_attraction");
                         } catch (ExecutionException | InterruptedException e) {
                             e.printStackTrace();
                         }

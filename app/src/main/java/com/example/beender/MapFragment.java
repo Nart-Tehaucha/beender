@@ -157,10 +157,10 @@ public class MapFragment extends Fragment implements AdapterView.OnItemSelectedL
             }
         });
 
+
+        // Init spinner
         spinner = (Spinner) view.findViewById(R.id.daysSpinner);
-
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
-
         if(parentFrag.equals("archive")) {
             if(getArguments().getString("type").equals("Star")) {
                 ArrayList<String> spinnerDays = new ArrayList<>();
@@ -199,14 +199,19 @@ public class MapFragment extends Fragment implements AdapterView.OnItemSelectedL
         }
 
         // FloatingActionButton setup
+        // Will clean up this mess later by making a dedicated method for changing the button.
         btnArchive = view.findViewById(R.id.btnArchive);
         if(getArguments() != null && getArguments().containsKey("archiveEdited") && getArguments().getBoolean("archiveEdited")) {
+            // If we loaded an archived trip and made edits, replaced the button with a save archive button.
             btnArchive.setVisibility(View.GONE);
             setupArchiveSaveButton(view);
         } else {
+            // If user went to MapFragment before swiping any cards, hide the archive button.
             if(CurrentItems.getInstance().getSwipedRight().get(0).isEmpty()) {
                 btnArchive.setVisibility(View.GONE);
-            } else if(getArguments() != null && getArguments().containsKey("parentFrag") && getArguments().getString("parentFrag").equals("archive")) {
+            }
+            // If we loaded an archived trip after swiping cards, change the archive button to a "back" button. When pressed it takes us back to the trip that we we're planning.
+            else if(getArguments() != null && getArguments().containsKey("parentFrag") && getArguments().getString("parentFrag").equals("archive")) {
                 btnArchive.setImageResource(R.drawable.ic_baseline_keyboard_tab_24);
                 btnArchive.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -258,7 +263,9 @@ public class MapFragment extends Fragment implements AdapterView.OnItemSelectedL
                         dialog.show();
                     }
                 });
-            } else {
+            }
+            // Normal case - the user swiped cards and went to MapFragment. The archive button allows to archive the trip.
+            else {
                 btnArchive.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
@@ -286,22 +293,15 @@ public class MapFragment extends Fragment implements AdapterView.OnItemSelectedL
                 });
             }
         }
-
         // Return view
         return view;
     }
 
-
+    // Draws routes for each seperate day in the trip, and gives them different colors.
     private void prepareMap(View view) {
         if(spinner.getVisibility() != View.GONE) {
             spinner.setSelection(0);
         }
-
-        Log.d(TAG, "================= BEFORE =================");
-        for(int i=0;i<CurrentItems.getInstance().getCurrDay()+1;i++) {
-            Log.d(TAG, "DAY " + i + " " + CurrentItems.getInstance().getSwipedRight().get(i).toString());
-        }
-        Log.d(TAG, "================= ====== =================");
 
         if(parentFrag.equals("archive")) {
             for(int i = 0 ; i < CurrentItems.getInstance().getArchiveMap().size(); i++) {
@@ -314,6 +314,7 @@ public class MapFragment extends Fragment implements AdapterView.OnItemSelectedL
         }
     }
 
+    // Draws route for a single day
     private void getDirections(View view, int day) {
 
         // Prepare a new ArrayList in currentMarkers and currentPolylines that will contain this day's markers and polylines.
@@ -322,6 +323,7 @@ public class MapFragment extends Fragment implements AdapterView.OnItemSelectedL
 
         polylineOptions = new PolylineOptions();
 
+        // If the displayed trip is from the archive, then only work with the archiveMap in CurrentItems, and not swipedRight.
         if(parentFrag.equals("archive")) {
             Log.d(TAG, "DAY " + day);
             swipedRight = CurrentItems.getInstance().getArchiveMap().get(String.valueOf(day));
@@ -342,6 +344,8 @@ public class MapFragment extends Fragment implements AdapterView.OnItemSelectedL
         // Create ArrayList containing all markers to add to the map. Origin and destination markers are colored different from the waypoint markers.
         markers = new ArrayList<>();
 
+        // Give Hotel icon to the starting hotel
+        // TODO disable this for Journey type trips.
         Bitmap hotelIcon = BitmapFactory.decodeResource(getResources(), R.drawable.hotel);
 
         markers.add(new MarkerOptions()
@@ -351,6 +355,8 @@ public class MapFragment extends Fragment implements AdapterView.OnItemSelectedL
         for(com.google.maps.model.LatLng l : mWaypoints) {
             markers.add(new MarkerOptions().position(new LatLng(l.lat, l.lng)));
         }
+
+        // Give the last destination a pink color.
         markers.add(new MarkerOptions()
                 .position(new LatLng(swipedRight.get(swipedRight.size()-1).lat, swipedRight.get(swipedRight.size()-1).lng))
                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ROSE)));
@@ -394,6 +400,7 @@ public class MapFragment extends Fragment implements AdapterView.OnItemSelectedL
             @Override
             public boolean onMarkerClick(com.google.android.gms.maps.model.Marker marker) {
 
+                // Clicking a marker displays a multi-choice dialog
                 AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
                 builder.setTitle("Choose:")
                         .setItems(R.array.marker_options_array, new DialogInterface.OnClickListener() {
@@ -402,8 +409,11 @@ public class MapFragment extends Fragment implements AdapterView.OnItemSelectedL
                                 int markerIndex = markerInfo[1];
                                 int markerDay = markerInfo[0];
 
+                                // If the displayed trip is from the archive, then only work with the archiveMap in CurrentItems, and not swipedRight.
+                                // TODO avoid repeated code and clean up this part
                                 if(parentFrag.equals("archive")) {
                                     switch(which) {
+                                        // Delete Marker
                                         case 0:
                                             if(getArguments() != null && getArguments().containsKey("type") && getArguments().getString("type").equals("Star") && markerIndex == 0) {
                                                 Toast.makeText(getContext(), "You can't remove the starting hotel!", Toast.LENGTH_SHORT).show();
@@ -416,6 +426,7 @@ public class MapFragment extends Fragment implements AdapterView.OnItemSelectedL
                                             mMap.clear();
                                             prepareMap(view);
                                             break;
+                                        // Search nearby hotel
                                         case 1:
                                             com.google.maps.model.LatLng hotelLatLng = new com.google.maps.model.LatLng(CurrentItems.getInstance().getArchiveMap().get(String.valueOf(markerDay)).get(markerIndex).lat, CurrentItems.getInstance().getArchiveMap().get(String.valueOf(markerDay)).get(markerIndex).lng);
                                             Bundle bundle = new Bundle();
@@ -428,10 +439,10 @@ public class MapFragment extends Fragment implements AdapterView.OnItemSelectedL
                                             break;
                                     }
 
-
-
+                                // Normal case
                                 } else {
                                     switch(which) {
+                                        // Delete Marker
                                         case 0:
                                             //Get user's preferences (from 'SETTINGS' fragment)
                                             SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
@@ -442,17 +453,10 @@ public class MapFragment extends Fragment implements AdapterView.OnItemSelectedL
 
                                             CurrentItems.getInstance().getSwipedRight().get(markerDay).remove(markerIndex);
 
-                                            Log.d(TAG, "REMOVING MARKER: " + markerIndex + " FROM DAY: " + markerInfo[1]);
-                                            Log.d(TAG, "SUPPOSED DAY: " + day);
-
-                                            Log.d(TAG, "================= AFTER =================");
-                                            for(int i=0;i<CurrentItems.getInstance().getCurrDay()+1;i++) {
-                                                Log.d(TAG, "DAY " + i + " " + CurrentItems.getInstance().getSwipedRight().get(i).toString());
-                                            }
-                                            Log.d(TAG, "================= ===== =================");
                                             mMap.clear();
                                             prepareMap(view);
                                             break;
+                                        // Search nearby hotel
                                         case 1:
                                             com.google.maps.model.LatLng hotelLatLng = new com.google.maps.model.LatLng(CurrentItems.getInstance().getSwipedRight().get(markerDay).get(markerIndex).getLat(), CurrentItems.getInstance().getSwipedRight().get(markerDay).get(markerIndex).getLng());
                                             Bundle bundle = new Bundle();
@@ -462,6 +466,7 @@ public class MapFragment extends Fragment implements AdapterView.OnItemSelectedL
                                             bundle.putString("parentFrag", "map");
                                             Navigation.findNavController(view).navigate(R.id.action_navigation_map_to_hotelSearchFragment, bundle);
                                             break;
+                                        // Go to attraction page
                                         case 2:
                                             ItemModel t = CurrentItems.getInstance().getSwipedRight().get(markerDay).get(markerIndex);
                                             Bundle bundle2 = new Bundle();
@@ -496,6 +501,7 @@ public class MapFragment extends Fragment implements AdapterView.OnItemSelectedL
         return resultList;
     }
 
+    // Handle spinner selection
     @Override
     public void onItemSelected(AdapterView<?> adapterView, View view, int pos, long id) {
         Log.d(TAG, "SPIN SELECTED " + pos);
