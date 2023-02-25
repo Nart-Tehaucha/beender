@@ -46,6 +46,7 @@ import com.example.beender.R;
 
 import com.example.beender.util.FetchData;
 import com.example.beender.util.FetchImage;
+import com.example.beender.util.FireStoreUtils;
 import com.example.beender.util.SearchNearby;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.CurrentLocationRequest;
@@ -212,9 +213,24 @@ public class DashboardFragment extends Fragment {
         btnStartTrip.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-//                Bundle bundle = new Bundle();
-//                bundle.putDoubleArray("latlng", new double[]{53.341050, -6.262876});
-//                Navigation.findNavController(view).navigate(R.id.action_navigation_dashboard_to_hotelSearchFragment, bundle);
+                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                builder.setTitle("Start a new trip?")
+                        .setMessage("This will delete any unsaved progress in your current trip.")
+                        .setPositiveButton(R.string.alertOk, new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                updateList(new ArrayList<>());
+                                CurrentItems.getInstance().reset();
+                                autocompleteFragment.setText("");
+                            }
+                        })
+                        .setNegativeButton(R.string.alertCancel, new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                // User cancelled the dialog
+                                dialog.cancel();
+                            }
+                        });
+                AlertDialog dialog = builder.create();
+                dialog.show();
             }
 
         });

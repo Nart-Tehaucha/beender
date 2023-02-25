@@ -135,6 +135,7 @@ public class SearchNearby {
         return null;
     }
 
+    // Loads next page of results - returns a list containing 20 new destinations
     public static List<ItemModel> getNextPage (String pageToken) throws ExecutionException, InterruptedException {
         StringBuilder stringBuilder = new StringBuilder("https://maps.googleapis.com/maps/api/place/nearbysearch/json?");
         stringBuilder.append("pagetoken=" + pageToken);
