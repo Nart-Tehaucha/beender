@@ -127,6 +127,7 @@
             </LinearLayout>
 
             <TextView
+                android:id="@+id/description_title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:padding="5dp"
@@ -157,6 +158,7 @@ I just need some text here to see how it will look"
                 />
 
             <TextView
+                android:id="@+id/reviews_title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:padding="5dp"
