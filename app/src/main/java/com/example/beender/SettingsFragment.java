@@ -70,6 +70,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 
@@ -138,6 +139,21 @@ public class SettingsFragment extends PreferenceFragmentCompat {
             @Override
             public boolean onPreferenceChange(Preference preference, Object newValue) {
                 Toast.makeText(getContext(), newValue.toString(), Toast.LENGTH_SHORT).show();
+                return true;
+            }
+        });
+
+        Preference darkMode = (Preference) findPreference("darkMode");
+        darkMode.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object newValue) {
+                if ((Boolean)newValue) {
+                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+                } else {
+                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+                }
+
+//                Toast.makeText(getContext(), newValue.toString(), Toast.LENGTH_SHORT).show();
                 return true;
             }
         });

@@ -3,6 +3,7 @@ package com.example.beender.util;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.preference.PreferenceManager;
 
 import java.util.HashSet;
@@ -57,5 +58,9 @@ public class Settings {
 
     public Set<String> getPriceLevel() {
         return sharedPreferences.getStringSet("priceLevel",new HashSet<>());
+    }
+
+    public boolean getDarkMode() {
+        return sharedPreferences.getBoolean("darkMode", AppCompatDelegate.getDefaultNightMode() == AppCompatDelegate.MODE_NIGHT_YES);
     }
 }

@@ -66,6 +66,8 @@ public class SearchNearby {
                 if(jobj.has("next_page_token")) {
                     String nextPageToken = jobj.getString("next_page_token");
                     CurrentItems.getInstance().setNextPageToken(nextPageToken);
+                }  else {
+                    CurrentItems.getInstance().setNextPageToken(null);
                 }
 
                 int imagesToLoadFirst = 3;
@@ -97,6 +99,8 @@ public class SearchNearby {
 
                         ItemModel attraction = new ItemModel(pId, null, pName, pCity, pCountry, pRating, pLat, pLng, pType);
 
+                        // Load only the first few images synchronously, the rest can be loaded in the background
+                        // for a faster response time
                         if (i < imagesToLoadFirst) {
                             Bitmap pImage = getPlacePhoto(((JSONObject) ((JSONArray) ((JSONObject) jarr.get(i)).get("photos")).get(0)).get("photo_reference").toString());
                             attraction.setImage(pImage);
@@ -166,6 +170,8 @@ public class SearchNearby {
                 if(jobj.has("next_page_token")) {
                     String nextPageToken = jobj.getString("next_page_token");
                     CurrentItems.getInstance().setNextPageToken(nextPageToken);
+                } else {
+                    CurrentItems.getInstance().setNextPageToken(null);
                 }
 
                 int imagesToLoadFirst = 3;
@@ -190,6 +196,8 @@ public class SearchNearby {
 
                         ItemModel attraction = new ItemModel(pId, null, pName, pCity, pCountry, pRating, pLat, pLng, 0);
 
+                        // Load only the first few images synchronously, the rest can be loaded in the background
+                        // for a faster response time
                         if (i < imagesToLoadFirst) {
                             Bitmap pImage = getPlacePhoto(((JSONObject) ((JSONArray) ((JSONObject) jarr.get(i)).get("photos")).get(0)).get("photo_reference").toString());
                             attraction.setImage(pImage);

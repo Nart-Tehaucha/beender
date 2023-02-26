@@ -12,6 +12,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.fragment.app.FragmentManager;
 import androidx.navigation.NavController;
 import androidx.navigation.NavDestination;
@@ -87,6 +88,12 @@ public class MainActivity extends AppCompatActivity {
         Log.i("ratingStar: " + settings.getRatingStar(), "INFO");
         Log.i("TypeOfPlaces: " + settings.getTypeOfPlaces(), "INFO");
         Log.i("priceLevel: " + settings.getPriceLevel(), "INFO");
+
+        if (settings.getDarkMode()) {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+        } else {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+        }
 
 
     }

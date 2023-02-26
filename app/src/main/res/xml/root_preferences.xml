@@ -63,7 +63,14 @@
             android:entries="@array/price_level_entries"
             android:entryValues="@array/price_level_entries"
             android:defaultValue="@array/price_level_entries"/>
+    </PreferenceCategory>
 
+    <PreferenceCategory app:title="VIEW SETTINGS">
+        <SwitchPreferenceCompat
+            app:defaultValue="false"
+            app:key="darkMode"
+            app:title="Dark Mode"
+            app:useSimpleSummaryProvider="true" />
     </PreferenceCategory>
 
 </PreferenceScreen>
