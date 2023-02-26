@@ -18,7 +18,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 public class ItemModel implements Serializable {
-    private static final String NO_DESCRIPTION = "No description available";
+    private static final String NO_DESCRIPTION = "";
 
     private String placeId;
     private transient Bitmap image;
@@ -27,7 +27,9 @@ public class ItemModel implements Serializable {
     private int type; // 0 - Destination, 1 - Hotel
 
     private transient ItemAdditionalData additionalData;
-    private transient Runnable onImageLoadedListener;
+    private transient Runnable onThumbnailLoadedListener;
+    private transient Runnable onMainImageLoadedListener;
+
 
     private boolean isDoneLoadingImages = false;
 
@@ -48,12 +50,24 @@ public class ItemModel implements Serializable {
 
     }
 
-    public void setImageLoadedListener(Runnable onImageLoadedListener) {
-        this.onImageLoadedListener = onImageLoadedListener;
+    public void setThumbnailLoadedListener(Runnable onImageLoadedListener) {
+        this.onThumbnailLoadedListener = onImageLoadedListener;
     }
 
-    private void onImageLoaded() {
-        onImageLoadedListener.run();
+    public void setMainImageLoadedListener(Runnable onMainImageLoadedListener) {
+        this.onMainImageLoadedListener = onMainImageLoadedListener;
+    }
+
+    private void onMainImageLoaded() {
+        if (onMainImageLoadedListener != null) {
+            onMainImageLoadedListener.run();
+        }
+    }
+
+    private void onThumbnailLoaded() {
+        if (onThumbnailLoadedListener != null) {
+            onThumbnailLoadedListener.run();
+        }
     }
 
     public ItemAdditionalData fetchAdditionalData() {
@@ -146,7 +160,7 @@ public class ItemModel implements Serializable {
 
             String fullDescription = page.get("extract").getAsString();
 
-            if (fullDescription.startsWith("There are a number of") || fullDescription.split("\n")[0].contains("may refer to")) {
+            if (fullDescription.startsWith("There are a number of") || fullDescription.contains("may refer to:")) {
                 return NO_DESCRIPTION;
             }
 
@@ -173,7 +187,7 @@ public class ItemModel implements Serializable {
                                 isDoneLoadingImages = true;
                             }
 
-                            onImageLoaded();
+                            onThumbnailLoaded();
 
                         } catch (IOException | InterruptedException | ExecutionException e) {
                             e.printStackTrace();
@@ -264,5 +278,6 @@ public class ItemModel implements Serializable {
 
     public void setImage(Bitmap image) {
         this.image = image;
+        onMainImageLoaded();
     }
 }

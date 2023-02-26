@@ -1,9 +1,7 @@
 package com.example.beender;
 
 import android.content.Intent;
-import android.content.res.Configuration;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
@@ -31,7 +29,6 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
@@ -86,7 +83,7 @@ public class AttractionPage extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        attractionArg.setImageLoadedListener(() -> {
+        attractionArg.setThumbnailLoadedListener(() -> {
             new Handler(Looper.getMainLooper()).post(() -> {
                 setThumbnails(view, attractionArg.fetchAdditionalData().getImages());
             });
@@ -127,7 +124,8 @@ public class AttractionPage extends Fragment {
         List<Review> reviews = additionalData.getReviews();
         LinearLayout reviewsLayout = (LinearLayout)parent.findViewById(R.id.reviews_layout);
 
-        if (reviews == null) {
+        if (reviews == null || reviews.size() == 0) {
+            parent.findViewById(R.id.reviews_title).setVisibility(View.GONE);
             return;
         }
 
@@ -324,7 +322,13 @@ public class AttractionPage extends Fragment {
         TextView attractionDescription = (TextView)parent.findViewById(R.id.attraction_description);
         TextView readMore = (TextView)parent.findViewById(R.id.read_more);
 
-        String fullDescription = attractionArg.fetchAdditionalData().getDescription();
+        String fullDescription = attractionArg.fetchAdditionalData().getDescription().trim();
+
+        if (fullDescription.isEmpty()) {
+            attractionDescription.setVisibility(View.GONE);
+            parent.findViewById(R.id.description_title).setVisibility(View.GONE);
+        }
+
         int index = fullDescription.indexOf("\n"); // Find the index of the first double line break
         String description;
         if (index >= 0) {

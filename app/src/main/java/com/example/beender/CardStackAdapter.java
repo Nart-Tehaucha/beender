@@ -1,5 +1,7 @@
 package com.example.beender;
 
+import android.os.Handler;
+import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -53,6 +55,16 @@ public class CardStackAdapter extends RecyclerView.Adapter<CardStackAdapter.View
 
         void setData(ItemModel data) {
             image.setImageBitmap(data.getImage());
+
+            data.setMainImageLoadedListener(new Runnable() {
+                @Override
+                public void run() {
+                    new Handler(Looper.getMainLooper()).post(() -> {
+                        image.setImageBitmap(data.getImage());
+                    });
+                }
+            });
+
             name.setText(data.getName());
 //            city.setText(data.getCity());
             country.setText(data.getCountry());
