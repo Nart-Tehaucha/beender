@@ -428,6 +428,10 @@ public class DashboardFragment extends Fragment {
 
                 Log.d(TAG, "onCardClicked: p=" + manager.getTopPosition());
 
+                if (manager.getTopPosition() == adapter.getItems().size()) {
+                    return;
+                }
+
                 ItemModel topItem = adapter.getItems().get(manager.getTopPosition() );
 
                 Log.d(TAG, "onCardClicked: currentItem=" + topItem.getName());
