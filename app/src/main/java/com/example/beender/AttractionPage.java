@@ -102,7 +102,7 @@ public class AttractionPage extends Fragment {
         double roundedAttractionRating = Math.ceil(attractionRating * 2) / 2.0;
         for (int i = 0; i < roundedAttractionRating; i++) {
             ImageView star = new ImageView(getContext());
-            star.setColorFilter(new PorterDuffColorFilter(ContextCompat.getColor(getContext(), com.google.android.libraries.places.R.color.quantum_yellow), PorterDuff.Mode.SRC_IN));
+            star.setColorFilter(new PorterDuffColorFilter(Color.parseColor("#FFFFC107"), PorterDuff.Mode.SRC_IN));
             int sizeInDp = 30;
             int sizeInPx = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, sizeInDp, getResources().getDisplayMetrics());
             star.setLayoutParams(new ViewGroup.LayoutParams(sizeInPx, sizeInPx));
@@ -156,7 +156,7 @@ public class AttractionPage extends Fragment {
             stars += "  ";
 
 
-            ForegroundColorSpan span = new ForegroundColorSpan(Color.YELLOW);
+            ForegroundColorSpan span = new ForegroundColorSpan(Color.parseColor("#FFFFC107"));
             starsAndDateBuilder.append(new SpannableString(stars), span, 0);
 
 
