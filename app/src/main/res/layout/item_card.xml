@@ -37,6 +37,8 @@
             android:textColor="@android:color/white"
             android:textSize="26sp"
             android:textStyle="bold"
+            android:shadowColor="#000000"
+            android:shadowRadius="8"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -48,6 +50,8 @@
             android:textColor="@android:color/white"
             android:textSize="20sp"
             android:textStyle="bold"
+            android:shadowColor="#000000"
+            android:shadowRadius="8"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/item_name" />
 
@@ -71,6 +75,8 @@
             android:textColor="@android:color/white"
             android:textSize="20sp"
             android:textStyle="bold"
+            android:shadowColor="#000000"
+            android:shadowRadius="8"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/item_country" />
 
@@ -82,6 +88,8 @@
             android:textColor="@android:color/white"
             android:textSize="20sp"
             android:textStyle="bold"
+            android:shadowColor="#000000"
+            android:shadowRadius="8"
             app:layout_constraintStart_toEndOf="@+id/rating_icon"
             app:layout_constraintTop_toTopOf="@+id/rating_icon" />
 
