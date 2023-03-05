@@ -469,9 +469,13 @@ public class MapFragment extends Fragment implements AdapterView.OnItemSelectedL
                                         // Go to attraction page
                                         case 2:
                                             ItemModel t = CurrentItems.getInstance().getSwipedRight().get(markerDay).get(markerIndex);
-                                            Bundle bundle2 = new Bundle();
-                                            bundle2.putSerializable("attraction", t);
-                                            Navigation.findNavController(view).navigate(R.id.action_navigation_map_to_attractionPageFragment, bundle2);
+
+                                            AttractionPage attractionDialog = new AttractionPage(t);
+                                            attractionDialog.show(requireActivity().getSupportFragmentManager(), "AttractionPage");
+
+//                                            Bundle bundle2 = new Bundle();
+//                                            bundle2.putSerializable("attraction", t);
+//                                            Navigation.findNavController(view).navigate(R.id.action_navigation_map_to_attractionPageFragment, bundle2);
                                     }
                                 }
                             }

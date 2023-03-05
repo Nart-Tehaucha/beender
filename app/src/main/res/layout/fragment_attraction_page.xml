@@ -8,6 +8,7 @@
     android:id="@+id/AttractionPage"
     tools:context=".AttractionPage"
     android:gravity="center_horizontal"
+    android:padding="8dp"
     >
 
 

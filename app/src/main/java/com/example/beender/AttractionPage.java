@@ -1,11 +1,15 @@
 package com.example.beender;
 
+import android.app.Dialog;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.Typeface;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 
@@ -22,6 +26,8 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -29,7 +35,10 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.content.ContextCompat;
+import androidx.core.graphics.ColorUtils;
+import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 
 import com.example.beender.model.ItemAdditionalData;
@@ -38,7 +47,7 @@ import com.example.beender.model.Review;
 
 import java.util.List;
 
-public class AttractionPage extends Fragment {
+public class AttractionPage extends DialogFragment {
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -66,6 +75,10 @@ public class AttractionPage extends Fragment {
 //        return fragment;
 //    }
 
+    public AttractionPage(ItemModel attractionArg) {
+        this.attractionArg = attractionArg;
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -83,6 +96,11 @@ public class AttractionPage extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        if (attractionArg == null) {
+            dismiss();
+            return;
+        }
+
         attractionArg.setThumbnailLoadedListener(() -> {
             new Handler(Looper.getMainLooper()).post(() -> {
                 setThumbnails(view, attractionArg.fetchAdditionalData().getImages());
@@ -218,8 +236,19 @@ public class AttractionPage extends Fragment {
     }
 
     private void setMainImage(View parent, List<Bitmap> images, int currentPosition) {
+        Bitmap currentImage = images.get(currentPosition);
         ImageView mainImage = (ImageView)parent.findViewById(R.id.main_image);
-        mainImage.setImageBitmap(images.get(currentPosition));
+        mainImage.setImageBitmap(currentImage);
+
+        if (currentImage != null) {
+            mainImage.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    ImageFragment dialog = new ImageFragment(currentImage);
+                    dialog.show(requireActivity().getSupportFragmentManager(), "ImageFragment");
+                }
+            });
+        }
     }
 
     private void setAllImages(View parent, List<Bitmap> images) {
@@ -359,5 +388,38 @@ public class AttractionPage extends Fragment {
 
     }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+        Dialog dialog = getDialog();
+        if (dialog != null) {
+            WindowManager.LayoutParams params = dialog.getWindow().getAttributes();
 
+            params.width = (int) (getResources().getDisplayMetrics().widthPixels * 0.95);
+
+            params.height = (int) (getResources().getDisplayMetrics().heightPixels * 0.95);
+
+            dialog.getWindow().setAttributes(params);
+
+            Window window = dialog.getWindow();
+
+            if (window != null) {
+                window.setGravity(Gravity.CENTER);
+
+                // create a drawable with rounded corners
+                GradientDrawable drawable = new GradientDrawable();
+
+                TypedValue typedValue = new TypedValue();
+                Resources.Theme theme = getActivity().getTheme();
+                theme.resolveAttribute(com.google.android.material.R.attr.colorOnPrimary, typedValue, true);
+                int color = typedValue.data;
+
+                drawable.setColor(color);
+                drawable.setCornerRadius(20);
+                window.setBackgroundDrawable(drawable);
+            }
+        }
+
+
+    }
 }

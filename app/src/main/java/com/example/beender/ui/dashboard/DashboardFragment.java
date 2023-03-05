@@ -19,6 +19,8 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 import android.view.animation.LinearInterpolator;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -36,6 +38,7 @@ import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.DiffUtil;
 
+import com.example.beender.AttractionPage;
 import com.example.beender.BuildConfig;
 import com.example.beender.CardStackAdapter;
 import com.example.beender.CardStackCallback;
@@ -437,11 +440,14 @@ public class DashboardFragment extends Fragment {
                 Log.d(TAG, "onCardClicked: currentItem=" + topItem.getName());
 
 
-                Bundle bundle = new Bundle();
-                bundle.putSerializable("attraction", topItem);
+                AttractionPage dialog = new AttractionPage(topItem);
+                dialog.show(requireActivity().getSupportFragmentManager(), "AttractionPage");
 
 
-                Navigation.findNavController(root).navigate(R.id.action_navigation_dashboard_to_attractionPageFragment, bundle);
+
+//                Bundle bundle = new Bundle();
+//                bundle.putSerializable("attraction", topItem);
+//                Navigation.findNavController(root).navigate(R.id.action_navigation_dashboard_to_attractionPageFragment, bundle);
 
             }
 
