@@ -111,7 +111,9 @@ public class TravelMapsAdapter extends RecyclerView.Adapter<TravelMapsAdapter.Tr
         bundle.putString("parentFrag", "archive");
         bundle.putString("type", t.getType());
         NavController navController = Navigation.findNavController(view);
-        navController.navigate(R.id.action_navigation_archive_to_navigation_map, bundle);
+//        navController.navigate(R.id.action_navigation_archive_to_navigation_map, bundle);
+        navController.navigate(R.id.action_navigation_archive_to_itinerary, bundle);
+
     }
 
     //This function remove open a dialog box that asks the user if he sure that

@@ -18,10 +18,6 @@
             android:id="@+id/action_navigation_map_to_navigation_archive"
             app:destination="@id/navigation_archive"
             app:enterAnim="@android:anim/fade_in" />
-        <action
-            android:id="@+id/action_navigation_map_to_attractionPageFragment"
-            app:destination="@id/attractionPageFragment"
-            app:enterAnim="@android:anim/fade_in" />
     </fragment>
 
     <fragment
@@ -35,9 +31,6 @@
         <action
             android:id="@+id/action_navigation_dashboard_to_hotelSearchFragment"
             app:destination="@id/hotelSearchFragment" />
-        <action
-            android:id="@+id/action_navigation_dashboard_to_attractionPageFragment"
-            app:destination="@id/attractionPageFragment" />
     </fragment>
 
 
@@ -56,6 +49,9 @@
             android:id="@+id/action_navigation_archive_to_navigation_map"
             app:destination="@id/navigation_map"
             app:enterAnim="@android:anim/fade_in" />
+        <action
+            android:id="@+id/action_navigation_archive_to_itinerary"
+            app:destination="@id/itineraryFragment" />
     </fragment>
     <fragment
         android:id="@+id/hotelSearchFragment"
@@ -77,6 +73,15 @@
         <argument
             android:name="attraction"
             app:argType="com.example.beender.model.ItemModel" />
+
+    </fragment>
+    <fragment
+        android:id="@+id/itineraryFragment"
+        android:name="com.example.beender.ItineraryFragment"
+        tools:layout="@layout/fragment_itinerary">
+<!--        <argument-->
+<!--            android:name="attraction"-->
+<!--            app:argType="com.example.beender.model.ItemModel" />-->
 
     </fragment>
 

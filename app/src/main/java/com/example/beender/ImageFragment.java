@@ -70,8 +70,8 @@ public class ImageFragment extends DialogFragment {
 
             @Override
             public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
-                float maxX = (mImageView.getWidth() * (mScaleFactor - 1) / 2) / mScaleFactor;
-                float maxY = (mImageView.getHeight() * (mScaleFactor - 1) / 2) / mScaleFactor;
+                float maxX = ((mImageView.getWidth() / 2) * (mScaleFactor - 1));
+                float maxY = ((mImageView.getHeight() / 2) * (mScaleFactor - 1));
                 float newX = Math.min(Math.max(mImageView.getTranslationX() - distanceX, -maxX), maxX);
                 float newY = Math.min(Math.max(mImageView.getTranslationY() - distanceY, -maxY), maxY);
                 mImageView.setTranslationX(newX);
@@ -98,10 +98,29 @@ public class ImageFragment extends DialogFragment {
 
         // when a scale gesture is detected, use it to resize the image
         @Override
-        public boolean onScale(ScaleGestureDetector scaleGestureDetector){
-            mScaleFactor *= scaleGestureDetector.getScaleFactor();
-            if (mScaleFactor < 1) {
-                return true;
+        public boolean onScale(ScaleGestureDetector detector) {
+            float mMinScaleFactor = 1.0f;
+            float mMaxScaleFactor = 5.0f;
+
+            float scaleFactor = detector.getScaleFactor();
+            mScaleFactor *= scaleFactor;
+            mScaleFactor = Math.max(mMinScaleFactor, Math.min(mScaleFactor, mMaxScaleFactor));
+
+            // Calculate new pivot point based on scale factor
+            float viewWidth = mImageView.getWidth();
+            float viewHeight = mImageView.getHeight();
+            float pivotX = viewWidth / 2f;
+            float pivotY = viewHeight / 2f;
+
+            // Adjust pivot point to center of gesture
+            float focusX = detector.getFocusX();
+            float focusY = detector.getFocusY();
+            if (focusX >= 0 && focusY >= 0) {
+                mImageView.setPivotX(focusX);
+                mImageView.setPivotY(focusY);
+            } else {
+                mImageView.setPivotX(pivotX);
+                mImageView.setPivotY(pivotY);
             }
 
             mImageView.setScaleX(mScaleFactor);
