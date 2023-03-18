@@ -49,5 +49,8 @@
     <string name="markerDialogMessage">Are you sure you want to remove this destination?</string>
     <string name="alertOk">Ok</string>
     <string name="alertCancel">Cancel</string>
+    <string name="delete_attraction_message">Are you sure you want to remove %s from your itinerary?</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
 
 </resources>
