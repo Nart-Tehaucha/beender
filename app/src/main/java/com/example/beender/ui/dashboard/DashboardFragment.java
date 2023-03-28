@@ -184,6 +184,7 @@ public class DashboardFragment extends Fragment {
         btnFinish.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                // User has picked less than two places
                 if(CurrentItems.getInstance().getSwipedRight().get(CurrentItems.getInstance().getCurrDay()).size() < 2) {
                     Toast.makeText(getContext(), "Pick at least two places!", Toast.LENGTH_SHORT).show();
                 } else {
@@ -198,7 +199,10 @@ public class DashboardFragment extends Fragment {
 
                     // If the trip type is "Journey" OR if we reached the final day, navigate to the map fragment and display the routes.
                     else {
-                        Navigation.findNavController(view).navigate(R.id.action_navigation_dashboard_to_navigation_map);
+                        Bundle bundle = new Bundle();
+                        bundle.putString("parentFrag", "dashboard");
+                        bundle.putString("type", sharedPreferences.getString("kind_of_trip", ""));
+                        Navigation.findNavController(view).navigate(R.id.action_navigation_dashboard_to_navigation_map, bundle);
                     }
                 }
             }

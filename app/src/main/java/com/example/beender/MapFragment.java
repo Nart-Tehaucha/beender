@@ -87,42 +87,6 @@ public class MapFragment extends Fragment implements AdapterView.OnItemSelectedL
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-//        // This callback will only be called when MyFragment is at least Started.
-//        OnBackPressedCallback callback = new OnBackPressedCallback(true /* enabled by default */) {
-//            @Override
-//            public void handleOnBackPressed() {
-//                // Handle the back button event
-//                Log.d(TAG, "EXITED MAP");
-//            }
-//        };
-//        requireActivity().getOnBackPressedDispatcher().addCallback(this, callback);
-//
-//        // The callback can be enabled or disabled here or in handleOnBackPressed()
-
-//        fm = getParentFragmentManager();
-//
-//        fm.addOnBackStackChangedListener(new FragmentManager.OnBackStackChangedListener() {
-//            @Override
-//            public void onBackStackChanged() {
-////                if(fm.getBackStackEntryCount() == 0) {
-////                    Log.d(TAG, "CLOSED MAP FRAG!");
-////                    CurrentItems.getInstance().reset();
-////                    fm.popBackStack();
-////                }
-//
-//                int backStackEntryCount = fm.getBackStackEntryCount();
-//
-//                if (backStackEntryCount > 0) {
-//                    FragmentManager.BackStackEntry backStackEntry = fm.getBackStackEntryAt(backStackEntryCount - 1);
-//
-//                    if (backStackEntry.getName().equals("MapFragment")) {
-//                        // MapFragment has been closed
-//                        // Do your handling here
-//                        Log.d(TAG, "FRAGMENT MAP CLOSED");
-//                    }
-//                }
-//            }
-//        });
     }
 
 
@@ -132,6 +96,7 @@ public class MapFragment extends Fragment implements AdapterView.OnItemSelectedL
 
         if(getArguments() != null && getArguments().containsKey("parentFrag")) {
             parentFrag = getArguments().getString("parentFrag");
+            Log.d(TAG, parentFrag);
         } else {
             parentFrag = "map";
         }
@@ -199,12 +164,11 @@ public class MapFragment extends Fragment implements AdapterView.OnItemSelectedL
         }
 
         // FloatingActionButton setup
-        // Will clean up this mess later by making a dedicated method for changing the button.
         btnArchive = view.findViewById(R.id.btnArchive);
         if(getArguments() != null && getArguments().containsKey("archiveEdited") && getArguments().getBoolean("archiveEdited")) {
             // If we loaded an archived trip and made edits, replaced the button with a save archive button.
             btnArchive.setVisibility(View.GONE);
-            setupArchiveSaveButton(view);
+            loadActionButton(view, 0);
         } else {
             // If user went to MapFragment before swiping any cards, hide the archive button.
             if(CurrentItems.getInstance().getSwipedRight().get(0).isEmpty()) {
@@ -212,85 +176,13 @@ public class MapFragment extends Fragment implements AdapterView.OnItemSelectedL
             }
             // If we loaded an archived trip after swiping cards, change the archive button to a "back" button. When pressed it takes us back to the trip that we we're planning.
             else if(getArguments() != null && getArguments().containsKey("parentFrag") && getArguments().getString("parentFrag").equals("archive")) {
-                btnArchive.setImageResource(R.drawable.ic_baseline_keyboard_tab_24);
-                btnArchive.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                        builder.setMessage("Return to current trip?")
-                                .setPositiveButton(R.string.alertOk, new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int id) {
-                                        mMap.clear();
-                                        parentFrag = "map";
-                                        prepareMap(view);
-
-                                        btnArchive.setImageResource(R.drawable.ic_baseline_archive_24);
-                                        btnArchive.setOnClickListener(new View.OnClickListener() {
-                                            @Override
-                                            public void onClick(View view) {
-                                                if(FireStoreUtils.archiveTrip(getContext())) {
-                                                    CurrentItems.getInstance().reset();
-                                                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                                                    builder.setMessage("Go to Archives?")
-                                                            .setPositiveButton(R.string.alertOk, new DialogInterface.OnClickListener() {
-                                                                public void onClick(DialogInterface dialog, int id) {
-                                                                    mMap.clear();
-                                                                    NavController navController = Navigation.findNavController(view);
-                                                                    navController.navigateUp();
-                                                                    navController.navigate(R.id.action_navigation_map_to_navigation_archive);
-                                                                }
-                                                            })
-                                                            .setNegativeButton(R.string.alertCancel, new DialogInterface.OnClickListener() {
-                                                                public void onClick(DialogInterface dialog, int id) {
-                                                                    // User cancelled the dialog
-                                                                    dialog.cancel();
-                                                                }
-                                                            });
-                                                    AlertDialog dialog = builder.create();
-                                                    dialog.show();
-                                                }
-                                            }
-                                        });
-                                    }
-                                })
-                                .setNegativeButton(R.string.alertCancel, new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int id) {
-                                        // User cancelled the dialog
-                                        dialog.cancel();
-                                    }
-                                });
-                        AlertDialog dialog = builder.create();
-                        dialog.show();
-                    }
-                });
+                Log.d(TAG, "STARTED CASE 1");
+                loadActionButton(view, 1);
             }
             // Normal case - the user swiped cards and went to MapFragment. The archive button allows to archive the trip.
             else {
-                btnArchive.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        if(FireStoreUtils.archiveTrip(getContext())) {
-                            CurrentItems.getInstance().reset();
-                            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                            builder.setMessage("Go to Archives?")
-                                    .setPositiveButton(R.string.alertOk, new DialogInterface.OnClickListener() {
-                                        public void onClick(DialogInterface dialog, int id) {
-                                            mMap.clear();
-                                            Navigation.findNavController(view).navigate(R.id.action_navigation_map_to_navigation_archive);
-                                        }
-                                    })
-                                    .setNegativeButton(R.string.alertCancel, new DialogInterface.OnClickListener() {
-                                        public void onClick(DialogInterface dialog, int id) {
-                                            // User cancelled the dialog
-                                            dialog.cancel();
-                                        }
-                                    });
-                            AlertDialog dialog = builder.create();
-                            dialog.show();
-                        }
-                    }
-
-                });
+                Log.d(TAG, "STARTED CASE 2");
+                loadActionButton(view, 2);
             }
         }
         // Return view
@@ -317,7 +209,7 @@ public class MapFragment extends Fragment implements AdapterView.OnItemSelectedL
     // Draws route for a single day
     private void getDirections(View view, int day) {
 
-        // Prepare a new ArrayList in currentMarkers and currentPolylines that will contain this day's markers and polylines.
+        // Prepare a new ArrayList in currentMarkers and current Polylines that will contain this day's markers and polylines.
         currentMarkers.put(day, new ArrayList<>());
         currentPolylines.put(day, new ArrayList<>());
 
@@ -396,6 +288,7 @@ public class MapFragment extends Fragment implements AdapterView.OnItemSelectedL
             currentMarkers.get(day).add(m);
         }
 
+        // Markers
         mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @Override
             public boolean onMarkerClick(com.google.android.gms.maps.model.Marker marker) {
@@ -409,75 +302,60 @@ public class MapFragment extends Fragment implements AdapterView.OnItemSelectedL
                                 int markerIndex = markerInfo[1];
                                 int markerDay = markerInfo[0];
 
-                                // If the displayed trip is from the archive, then only work with the archiveMap in CurrentItems, and not swipedRight.
-                                // TODO avoid repeated code and clean up this part
+                                com.google.maps.model.LatLng hotelLatLng;
+                                String fromFrag = "map";
+
                                 if(parentFrag.equals("archive")) {
-                                    switch(which) {
-                                        // Delete Marker
-                                        case 0:
-                                            if(getArguments() != null && getArguments().containsKey("type") && getArguments().getString("type").equals("Star") && markerIndex == 0) {
-                                                Toast.makeText(getContext(), "You can't remove the starting hotel!", Toast.LENGTH_SHORT).show();
-                                                break;
-                                            }
-
-                                            setupArchiveSaveButton(view);
-                                            CurrentItems.getInstance().getArchiveMap().get(String.valueOf(markerDay)).remove(markerIndex);
-
-                                            mMap.clear();
-                                            prepareMap(view);
-                                            break;
-                                        // Search nearby hotel
-                                        case 1:
-                                            com.google.maps.model.LatLng hotelLatLng = new com.google.maps.model.LatLng(CurrentItems.getInstance().getArchiveMap().get(String.valueOf(markerDay)).get(markerIndex).lat, CurrentItems.getInstance().getArchiveMap().get(String.valueOf(markerDay)).get(markerIndex).lng);
-                                            Bundle bundle = new Bundle();
-                                            bundle.putDoubleArray("latlng", new double[]{hotelLatLng.lat, hotelLatLng.lng});
-                                            bundle.putInt("markerIndex", markerIndex);
-                                            bundle.putInt("markerDay", markerDay);
-                                            bundle.putString("type", getArguments().getString("type"));
-                                            bundle.putString("parentFrag", "archiveMap");
-                                            Navigation.findNavController(view).navigate(R.id.action_navigation_map_to_hotelSearchFragment, bundle);
-                                            break;
-                                    }
-
-                                // Normal case
+                                    hotelLatLng = new com.google.maps.model.LatLng(CurrentItems.getInstance().getArchiveMap().get(String.valueOf(markerDay)).get(markerIndex).lat, CurrentItems.getInstance().getArchiveMap().get(String.valueOf(markerDay)).get(markerIndex).lng);
+                                    fromFrag = "archiveMap";
                                 } else {
-                                    switch(which) {
-                                        // Delete Marker
-                                        case 0:
-                                            //Get user's preferences (from 'SETTINGS' fragment)
-                                            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
-                                            if(sharedPreferences.getString("kind_of_trip", "").equals("Star") && markerIndex == 0) {
-                                                Toast.makeText(getContext(), "You can't remove the starting hotel!", Toast.LENGTH_SHORT).show();
-                                                break;
-                                            }
+                                    hotelLatLng = new com.google.maps.model.LatLng(CurrentItems.getInstance().getSwipedRight().get(markerDay).get(markerIndex).getLat(), CurrentItems.getInstance().getSwipedRight().get(markerDay).get(markerIndex).getLng());
+                                }
 
+                                switch(which) {
+                                    // Delete Marker
+                                    case 0:
+                                        if(getArguments() != null && getArguments().containsKey("type") && getArguments().getString("type").equals("Star") && markerIndex == 0) {
+                                            Toast.makeText(getContext(), "You can't remove the starting hotel!", Toast.LENGTH_SHORT).show();
+                                            break;
+                                        }
+                                        if(parentFrag.equals("archive")) {
+                                            loadActionButton(view, 0);
+                                            CurrentItems.getInstance().getArchiveMap().get(String.valueOf(markerDay)).remove(markerIndex);
+                                        } else {
                                             CurrentItems.getInstance().getSwipedRight().get(markerDay).remove(markerIndex);
+                                        }
 
-                                            mMap.clear();
-                                            prepareMap(view);
+                                        mMap.clear();
+                                        prepareMap(view);
+                                        break;
+                                    // Search nearby hotel
+                                    case 1:
+                                        Bundle bundle = new Bundle();
+                                        bundle.putDoubleArray("latlng", new double[]{hotelLatLng.lat, hotelLatLng.lng});
+                                        bundle.putInt("markerIndex", markerIndex);
+                                        bundle.putInt("markerDay", markerDay);
+                                        bundle.putString("type", getArguments().getString("type"));
+                                        bundle.putString("parentFrag", fromFrag);
+                                        Navigation.findNavController(view).navigate(R.id.action_navigation_map_to_hotelSearchFragment, bundle);
+                                        break;
+                                    // Go to attraction page
+                                    case 2:
+                                        if(parentFrag.equals("archive")) {
+                                            Toast.makeText(getContext(), "Cannot view attraction page of an archived trip.", Toast.LENGTH_SHORT).show();
                                             break;
-                                        // Search nearby hotel
-                                        case 1:
-                                            com.google.maps.model.LatLng hotelLatLng = new com.google.maps.model.LatLng(CurrentItems.getInstance().getSwipedRight().get(markerDay).get(markerIndex).getLat(), CurrentItems.getInstance().getSwipedRight().get(markerDay).get(markerIndex).getLng());
-                                            Bundle bundle = new Bundle();
-                                            bundle.putDoubleArray("latlng", new double[]{hotelLatLng.lat, hotelLatLng.lng});
-                                            bundle.putInt("markerIndex", markerIndex);
-                                            bundle.putInt("markerDay", markerDay);
-                                            bundle.putString("parentFrag", "map");
-                                            Navigation.findNavController(view).navigate(R.id.action_navigation_map_to_hotelSearchFragment, bundle);
-                                            break;
-                                        // Go to attraction page
-                                        case 2:
-                                            ItemModel t = CurrentItems.getInstance().getSwipedRight().get(markerDay).get(markerIndex);
+                                        }
+                                        ItemModel t = CurrentItems.getInstance().getSwipedRight().get(markerDay).get(markerIndex);
 
-                                            AttractionPage attractionDialog = new AttractionPage(t);
-                                            attractionDialog.show(requireActivity().getSupportFragmentManager(), "AttractionPage");
+                                        AttractionPage attractionDialog = new AttractionPage(t);
+                                        attractionDialog.show(requireActivity().getSupportFragmentManager(), "AttractionPage");
 
 //                                            Bundle bundle2 = new Bundle();
 //                                            bundle2.putSerializable("attraction", t);
 //                                            Navigation.findNavController(view).navigate(R.id.action_navigation_map_to_attractionPageFragment, bundle2);
-                                    }
+                                        break;
                                 }
+
                             }
                         });
                 AlertDialog dialog = builder.create();
@@ -547,31 +425,92 @@ public class MapFragment extends Fragment implements AdapterView.OnItemSelectedL
         }
     }
 
-    private void setupArchiveSaveButton (View view) {
-        // After doing any edits to the archive map, transform the FloatingActionButton to a Save button. OnClick it updates the Archived map in Firestore.
+    private void loadActionButton(View view, int type) {
         btnSaveArchive = view.findViewById(R.id.btnSaveArchive);
         btnSaveArchive.setVisibility(View.VISIBLE);
-        btnSaveArchive.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                builder.setMessage("Save Archive Edits?")
-                        .setPositiveButton(R.string.alertOk, new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                FireStoreUtils.updateArchivedTrip();
-                            }
-                        })
-                        .setNegativeButton(R.string.alertCancel, new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                // User cancelled the dialog
-                                dialog.cancel();
-                            }
-                        });
-                AlertDialog dialog = builder.create();
-                dialog.show();
-            }
 
-        });
+        switch(type) {
+            // CASE 0 - Save changes to archived trip
+            case 0:
+                btnSaveArchive.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                        builder.setMessage("Save Archive Edits?")
+                                .setPositiveButton(R.string.alertOk, new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+                                        FireStoreUtils.updateArchivedTrip();
+                                    }
+                                })
+                                .setNegativeButton(R.string.alertCancel, new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+                                        // User cancelled the dialog
+                                        dialog.cancel();
+                                    }
+                                });
+                        AlertDialog dialog = builder.create();
+                        dialog.show();
+                    }
+
+                });
+                break;
+            // CASE 1 - Return to current trip
+            case 1:
+                btnArchive.setImageResource(R.drawable.ic_baseline_keyboard_tab_24);
+                btnArchive.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                        builder.setMessage("Return to current trip?")
+                                .setPositiveButton(R.string.alertOk, new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+                                        loadActionButton(view, 2);
+                                    }
+                                })
+                                .setNegativeButton(R.string.alertCancel, new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+                                        // User cancelled the dialog
+                                        dialog.cancel();
+                                    }
+                                });
+                        AlertDialog dialog = builder.create();
+                        dialog.show();
+                    }
+                });
+                break;
+            // CASE 2 - Add current trip to the archive
+            case 2:
+                Log.d(TAG, "IN CASE 2");
+                btnArchive.setImageResource(R.drawable.ic_baseline_archive_24);
+                btnArchive.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        if(FireStoreUtils.archiveTrip(getContext())) {
+                            CurrentItems.getInstance().reset();
+                            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                            builder.setMessage("Go to Archives?")
+                                    .setPositiveButton(R.string.alertOk, new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog, int id) {
+                                            mMap.clear();
+                                            NavController navController = Navigation.findNavController(view);
+                                            navController.navigateUp();
+                                            navController.navigate(R.id.action_navigation_map_to_navigation_archive);
+                                        }
+                                    })
+                                    .setNegativeButton(R.string.alertCancel, new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog, int id) {
+                                            // User cancelled the dialog
+                                            dialog.cancel();
+                                        }
+                                    });
+                            AlertDialog dialog = builder.create();
+                            dialog.show();
+                        }
+                    }
+
+                });
+                break;
+        }
     }
 
     @Override
