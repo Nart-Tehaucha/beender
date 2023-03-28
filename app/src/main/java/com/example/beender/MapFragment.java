@@ -68,7 +68,6 @@ public class MapFragment extends Fragment implements AdapterView.OnItemSelectedL
     private GoogleMap mMap;
     private Spinner spinner;
     private FloatingActionButton btnArchive;
-    private FloatingActionButton btnSaveArchive;
     private String parentFrag;
     private boolean tripIsArchived;
 
@@ -426,13 +425,12 @@ public class MapFragment extends Fragment implements AdapterView.OnItemSelectedL
     }
 
     private void loadActionButton(View view, int type) {
-        btnSaveArchive = view.findViewById(R.id.btnSaveArchive);
-        btnSaveArchive.setVisibility(View.VISIBLE);
+        btnArchive.setVisibility(View.VISIBLE);
 
         switch(type) {
             // CASE 0 - Save changes to archived trip
             case 0:
-                btnSaveArchive.setOnClickListener(new View.OnClickListener() {
+                btnArchive.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
                         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
@@ -464,6 +462,9 @@ public class MapFragment extends Fragment implements AdapterView.OnItemSelectedL
                         builder.setMessage("Return to current trip?")
                                 .setPositiveButton(R.string.alertOk, new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog, int id) {
+                                        mMap.clear();
+                                        parentFrag = "map";
+                                        prepareMap(view);
                                         loadActionButton(view, 2);
                                     }
                                 })
@@ -485,28 +486,28 @@ public class MapFragment extends Fragment implements AdapterView.OnItemSelectedL
                 btnArchive.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        if(FireStoreUtils.archiveTrip(getContext())) {
-                            CurrentItems.getInstance().reset();
-                            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                            builder.setMessage("Go to Archives?")
-                                    .setPositiveButton(R.string.alertOk, new DialogInterface.OnClickListener() {
-                                        public void onClick(DialogInterface dialog, int id) {
-                                            mMap.clear();
-                                            NavController navController = Navigation.findNavController(view);
-                                            navController.navigateUp();
-                                            navController.navigate(R.id.action_navigation_map_to_navigation_archive);
-                                        }
-                                    })
-                                    .setNegativeButton(R.string.alertCancel, new DialogInterface.OnClickListener() {
-                                        public void onClick(DialogInterface dialog, int id) {
-                                            // User cancelled the dialog
-                                            dialog.cancel();
-                                        }
-                                    });
-                            AlertDialog dialog = builder.create();
-                            dialog.show();
+                        FireStoreUtils.archiveTrip(getContext());
+                        CurrentItems.getInstance().reset();
+                        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                        builder.setMessage("Go to Archives?")
+                                .setPositiveButton(R.string.alertOk, new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+                                        mMap.clear();
+                                        NavController navController = Navigation.findNavController(view);
+                                        navController.navigateUp();
+                                        navController.navigate(R.id.action_navigation_map_to_navigation_archive);
+                                    }
+                                })
+                                .setNegativeButton(R.string.alertCancel, new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+                                        // User cancelled the dialog
+                                        dialog.cancel();
+                                    }
+                                });
+                        AlertDialog dialog = builder.create();
+                        dialog.show();
                         }
-                    }
+
 
                 });
                 break;
